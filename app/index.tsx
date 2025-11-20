@@ -61,8 +61,18 @@ export default function Home() {
             bg="#d8d3ff"
             onPress={() => router.push("/reflect")} 
           />
-          <ActionCard label="Grow" emoji="🌱" bg="#cdeed6" onPress={() => {}} />
-          <ActionCard label="Thrive" emoji="🌸" bg="#edc1cf" onPress={() => {}} />
+          <ActionCard 
+          label="Grow" 
+            emoji="🌱" 
+            bg="#cdeed6" 
+            onPress={() => {}} 
+            />
+          <ActionCard 
+          label="Thrive" 
+          emoji="🌸" 
+          bg="#edc1cf" 
+          onPress={() => router.push("/thrive")}
+          />
         </View>
 
         {/* Daily Motivation Card */}
