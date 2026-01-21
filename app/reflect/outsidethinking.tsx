@@ -14,15 +14,31 @@ import {
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
-import {
-  fetchInspirationsForPrompt,
-  fetchRandomOutsideInPrompt,
-  OutsideInInspiration,
-  OutsideInPrompt,
-} from "../thrive/outsidethinkingdata";
 
 const DEMO_USER_ID = "demo-student-1";
 
+type OutsideInPrompt = {
+  id: number;
+  prompt_text: string;
+};
+
+type OutsideInInspiration = {
+  inspiration_text: string;
+};
+
+async function fetchRandomOutsideInPrompt(): Promise<OutsideInPrompt> {
+  const res = await fetch(`${API_BASE}/outside_in/random`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fetchInspirationsForPrompt(
+  promptId: number
+): Promise<OutsideInInspiration[]> {
+  const res = await fetch(`${API_BASE}/outside_in/${promptId}/inspirations`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
 export default function OutsideThinking() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
