@@ -1,30 +1,34 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
 
-export default function EodEntryDataScreen() {
+export default function TrapTrackEntryDataScreen() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const params = useLocalSearchParams<{
     id?: string;
     created_at?: string;
-    went_well?: string;
-    learned?: string;
-    proud_of?: string;
-    self_care?: string;
+    circumstance?: string;
+    trigger?: string;
+    response?: string;
+    avoidance?: string;
+    consequence?: string;
+    copingstrategy?: string;
+    tryalternative?: string;
+    consequenceafter?: string;
   }>();
 
   const { niceDate, niceTime } = useMemo(
@@ -32,10 +36,14 @@ export default function EodEntryDataScreen() {
     [params.created_at]
   );
 
-  const [wentWell, setWentWell] = useState(params.went_well ?? "");
-  const [learned, setLearned] = useState(params.learned ?? "");
-  const [proudOf, setProudOf] = useState(params.proud_of ?? "");
-  const [selfCare, setSelfCare] = useState(params.self_care ?? "");
+  const [circumstance, setCircumstance] = useState(params.circumstance ?? "");
+  const [trigger, setTrigger] = useState(params.trigger ?? "");
+  const [response, setResponse] = useState(params.response ?? "");
+  const [avoidance, setAvoidance] = useState(params.avoidance ?? "");
+  const [consequence, setConsequence] = useState(params.consequence ?? "");
+  const [copingstrategy, setCopingStrategy] = useState(params.copingstrategy ?? "");
+  const [tryalternative, setTryAlternative] = useState(params.tryalternative ?? "");
+  const [consequenceafter, setConsequenceAfter] = useState(params.consequenceafter ?? "");
 
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -47,15 +55,19 @@ export default function EodEntryDataScreen() {
       setSaving(true);
 
       const res = await fetch(
-        `${API_BASE}/end-of-day-reflections/${params.id}`,
+        `${API_BASE}/trap_and_track/${params.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            went_well: wentWell,
-            learned,
-            proud_of: proudOf,
-            self_care: selfCare,
+            circumstance: circumstance,
+            trigger: trigger,
+            response: response,
+            avoidance: avoidance,
+            consequence: consequence,
+            copingstrategy: copingstrategy,
+            tryalternative: tryalternative,
+            consequenceafter: consequenceafter,
           }),
         }
       );
@@ -64,10 +76,10 @@ export default function EodEntryDataScreen() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      Alert.alert("Saved", "Your reflection has been updated.");
+      Alert.alert("Saved", "Your Trap & Track has been updated.");
       setIsEditing(false);
     } catch (e) {
-      console.log("EOD update error", e);
+      console.log("TT update error", e);
       Alert.alert("Oops", "Could not save changes. Please try again.");
     } finally {
       setSaving(false);
@@ -95,7 +107,7 @@ export default function EodEntryDataScreen() {
   async function handleDelete(id: string) {
     try {
       const res = await fetch(
-        `${API_BASE}/end-of-day-reflections/${id}`,
+        `${API_BASE}/trap_and_track/${id}`,
         { method: "DELETE" }
       );
 
@@ -103,10 +115,10 @@ export default function EodEntryDataScreen() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      Alert.alert("Deleted", "Your reflection has been deleted.");
+      Alert.alert("Deleted", "Your Trap & Track has been deleted.");
       router.replace("/thrive/accessalldata");
     } catch (e) {
-      console.log("EOD delete error", e);
+      console.log("TT delete error", e);
       Alert.alert("Oops", "Could not delete entry. Please try again.");
     }
   }
@@ -140,7 +152,7 @@ export default function EodEntryDataScreen() {
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>End of Day Reflection</Text>
+            <Text style={styles.title}>Trap & Track</Text>
             <Text style={styles.subtitle}>
               {niceDate} — {niceTime}
             </Text>
@@ -149,96 +161,186 @@ export default function EodEntryDataScreen() {
         <View style={{ width: 24 }} />
         </View>
 
-        {/* Four cards  */}
+        {/* Trap & Track cards */}
         <View style={{ marginTop: 12 }}>
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>What went well today?</Text>
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Circumstance</Text>
             <View style={styles.cardInner}>
-              {isEditing ? (
+            {isEditing ? (
                 <TextInput
-                  value={wentWell}
-                  onChangeText={setWentWell}
-                  multiline
-                  style={styles.cardInput}
-                  placeholder="Write a moment, action, or small win that made today better."
-                  placeholderTextColor="#b9a5ff"
+                value={circumstance}
+                onChangeText={setCircumstance}
+                multiline
+                style={styles.cardInput}
+                placeholder="What was going on at the time?"
+                placeholderTextColor="#b9a5ff"
                 />
-              ) : (
+            ) : (
                 <Text style={styles.cardText}>
-                  {wentWell.trim().length > 0
-                    ? wentWell
+                {circumstance.trim().length > 0
+                    ? circumstance
                     : "No answer added for this question."}
                 </Text>
-              )}
+            )}
             </View>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>Something I learned</Text>
-            <View style={styles.cardInner}>
-              {isEditing ? (
-                <TextInput
-                  value={learned}
-                  onChangeText={setLearned}
-                  multiline
-                  style={styles.cardInput}
-                  placeholder="What did today teach you about yourself, others, or life?"
-                  placeholderTextColor="#b9a5ff"
-                />
-              ) : (
-                <Text style={styles.cardText}>
-                  {learned.trim().length > 0
-                    ? learned
-                    : "No answer added for this question."}
-                </Text>
-              )}
-            </View>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>I’m proud of myself for...</Text>
-            <View style={styles.cardInner}>
-              {isEditing ? (
-                <TextInput
-                  value={proudOf}
-                  onChangeText={setProudOf}
-                  multiline
-                  style={styles.cardInput}
-                  placeholder="A choice, action, or habit you showed today."
-                  placeholderTextColor="#b9a5ff"
-                />
-              ) : (
-                <Text style={styles.cardText}>
-                  {proudOf.trim().length > 0
-                    ? proudOf
-                    : "No answer added for this question."}
-                </Text>
-              )}
-            </View>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>Self-care I practiced</Text>
-            <View style={styles.cardInner}>
-              {isEditing ? (
-                <TextInput
-                  value={selfCare}
-                  onChangeText={setSelfCare}
-                  multiline
-                  style={styles.cardInput}
-                  placeholder="Anything you did, small or big, that supported your well being."
-                  placeholderTextColor="#b9a5ff"
-                />
-              ) : (
-                <Text style={styles.cardText}>
-                  {selfCare.trim().length > 0
-                    ? selfCare
-                    : "No answer added for this question."}
-                </Text>
-              )}
-            </View>
-          </View>
         </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Trigger</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={trigger}
+                onChangeText={setTrigger}
+                multiline
+                style={styles.cardInput}
+                placeholder="What set off the thought or emotion?"
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {trigger.trim().length > 0
+                    ? trigger
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Response</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={response}
+                onChangeText={setResponse}
+                multiline
+                style={styles.cardInput}
+                placeholder="How did you feel or react in the moment?"
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {response.trim().length > 0
+                    ? response
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Avoidance Pattern</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={avoidance}
+                onChangeText={setAvoidance}
+                multiline
+                style={styles.cardInput}
+                placeholder="Did you avoid anything or withdraw in response?"
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {avoidance.trim().length > 0
+                    ? avoidance
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Consequences</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={consequence}
+                onChangeText={setConsequence}
+                multiline
+                style={styles.cardInput}
+                placeholder="How did this affect your thoughts, mood, or behaviour afterward?"
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {consequence.trim().length > 0
+                    ? consequence
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Possible Alternative Coping Strategies</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={copingstrategy}
+                onChangeText={setCopingStrategy}
+                multiline
+                style={styles.cardInput}
+                placeholder="List healthier ways you could respond in this situation."
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {copingstrategy.trim().length > 0
+                    ? copingstrategy
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Choose One Alternative to Try</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={tryalternative}
+                onChangeText={setTryAlternative}
+                multiline
+                style={styles.cardInput}
+                placeholder="Pick one strategy to use next time this happens."
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {tryalternative.trim().length > 0
+                    ? tryalternative
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+
+        <View style={styles.card}>
+            <Text style={styles.cardLabel}>Consequences (After Trying the Alternative)</Text>
+            <View style={styles.cardInner}>
+            {isEditing ? (
+                <TextInput
+                value={consequenceafter}
+                onChangeText={setConsequenceAfter}
+                multiline
+                style={styles.cardInput}
+                placeholder="If you tried this new approach, how do you think you would feel or react afterward?"
+                placeholderTextColor="#b9a5ff"
+                />
+            ) : (
+                <Text style={styles.cardText}>
+                {consequenceafter.trim().length > 0
+                    ? consequenceafter
+                    : "No answer added for this question."}
+                </Text>
+            )}
+            </View>
+        </View>
+        </View>
+
+
 
         {/* Buttons */}
         <View style={{ marginTop: 40 }}>

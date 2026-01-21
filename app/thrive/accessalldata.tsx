@@ -29,11 +29,37 @@ type EodReflection = {
   self_care: string | null;
   created_at: string;
 };
+type TrapTrack = {
+  id: string;
+  circumstance: string | null;
+  trigger: string | null;
+  response: string | null;
+  avoidance: string | null;
+  consequence: string | null;
+  copingstrategy: string | null;
+  tryalternative: string | null;
+  consequenceafter: string | null;
+  created_at: string;
+};
+type GratitudeEntry = {
+  id: string;
+  text: string;
+  created_at: string;
+};
+type OutsideInEntry = {
+  id: string;
+  prompt_id: number;
+  action_text: string;
+  created_at: string;
+};
 
 // Combined type for the list
 type ListItem =
   | (MoodEntry & { kind: "mood" })
-  | (EodReflection & { kind: "eod" });
+  | (EodReflection & { kind: "eod" })
+  | (TrapTrack & { kind: "trap" })
+  | (GratitudeEntry & { kind: "gratitude" })
+  | (OutsideInEntry & { kind: "outside_in" });
 
 export default function AccessAllDataScreen() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -50,7 +76,7 @@ export default function AccessAllDataScreen() {
         setError(null);
 
         // Fetch mood entries
-        const moodRes = await fetch(`${API_BASE}/entries`);
+        const moodRes = await fetch(`${API_BASE}/mood_entries`);
         if (!moodRes.ok) throw new Error(`mood HTTP ${moodRes.status}`);
         const moodData: MoodEntry[] = await moodRes.json();
 
@@ -58,6 +84,21 @@ export default function AccessAllDataScreen() {
         const eodRes = await fetch(`${API_BASE}/end-of-day-reflections`);
         if (!eodRes.ok) throw new Error(`eod HTTP ${eodRes.status}`);
         const eodData: EodReflection[] = await eodRes.json();
+
+        // Fetch trap & tracks
+        const trapRes = await fetch(`${API_BASE}/trap_and_track`);
+        if (!trapRes.ok) throw new Error(`trap HTTP ${trapRes.status}`);
+        const trapData: TrapTrack[] = await trapRes.json();
+
+        // Fetch gratitude entries
+        const gratRes = await fetch(`${API_BASE}/gratitude_entries`);
+        if (!gratRes.ok) throw new Error(`gratitude HTTP ${gratRes.status}`);
+        const gratData: GratitudeEntry[] = await gratRes.json();
+
+        // Fetch outside-in actions
+        const outsideRes = await fetch(`${API_BASE}/outside_in_actions`);
+        if (!outsideRes.ok) throw new Error(`outside-in HTTP ${outsideRes.status}`);
+        const outsideData: OutsideInEntry[] = await outsideRes.json();
 
         // Tag each with kind
         const moodItems: ListItem[] = moodData.map((m) => ({
@@ -68,16 +109,28 @@ export default function AccessAllDataScreen() {
           ...e,
           kind: "eod",
         }));
+        const trapItems: ListItem[] = trapData.map((t) => ({
+          ...t,
+          kind: "trap",
+        }));
+         const gratItems: ListItem[] = gratData.map((g) => ({
+          ...g,
+          kind: "gratitude",
+        }));
+        const outsideItems: ListItem[] = outsideData.map((o) => ({
+          ...o,
+          kind: "outside_in",
+        }));
 
         // Merge + sort newest first
-        const merged = [...moodItems, ...eodItems].sort(
+        const merged = [...moodItems, ...eodItems, ...trapItems, ...gratItems, ...outsideItems].sort(
           (a, b) =>
             new Date(b.created_at).getTime() -
             new Date(a.created_at).getTime()
         );
 
         setItems(merged);
-      } catch (e) {
+      } catch (e: any) {
         console.log("Load error", e);
         setError("Could not load entries.");
       } finally {
@@ -170,13 +223,27 @@ export default function AccessAllDataScreen() {
           items.map((item) => {
             const { niceDate, niceTime } = formatDate(item.created_at);
 
-            const isMood = item.kind === "mood";
+            const title =
+              item.kind === "mood"
+                ? "Mood Entry"
+                : item.kind === "eod"
+                ? "End of Day Reflection"
+                : item.kind === "trap"
+                ? "Trap & Track"
+                : item.kind === "gratitude"
+                ? "Daily Gratitude"
+                : "Outside-In Thinking";
 
-            const title = isMood
-              ? "Mood Entry"
-              : "End of Day Reflection";
-
-            const emoji = isMood ? "😊" : "📘";
+            const emoji =
+              item.kind === "mood"
+                ? "😊"
+                : item.kind === "eod"
+                ? "📘"
+                : item.kind === "trap"
+                ? "🔍"
+                : item.kind === "gratitude"
+                ? "🙏"
+                : "💭";
 
             return (
               <EntryRow
@@ -186,8 +253,7 @@ export default function AccessAllDataScreen() {
                 date={niceDate}
                 time={niceTime}
                 onPress={() => {
-                  if (isMood) {
-                    // Go to mood details
+                  if (item.kind === "mood") {
                     const m = item as MoodEntry & { kind: "mood" };
                     router.push({
                       pathname: "/thrive/moodentrydata",
@@ -198,8 +264,7 @@ export default function AccessAllDataScreen() {
                         created_at: m.created_at,
                       },
                     });
-                  } else {
-                    // Go to EOD reflection details
+                  } else if (item.kind === "eod") {
                     const e = item as EodReflection & { kind: "eod" };
                     router.push({
                       pathname: "/thrive/dailyreflectiondata",
@@ -212,6 +277,44 @@ export default function AccessAllDataScreen() {
                         self_care: e.self_care ?? "",
                       },
                     });
+                  } else if (item.kind === "trap") {
+                    const t = item as TrapTrack & { kind: "trap" };
+                    router.push({
+                      pathname: "/thrive/trapandtrackdata",
+                      params: {
+                        id: t.id,
+                        created_at: t.created_at,
+                        circumstance: t.circumstance ?? "",
+                        trigger: t.trigger ?? "",
+                        response: t.response ?? "",
+                        avoidance: t.avoidance ?? "",
+                        consequence: t.consequence ?? "",
+                        copingstrategy: t.copingstrategy ?? "",
+                        tryalternative: t.tryalternative ?? "",
+                        consequenceafter: t.consequenceafter ?? "",
+                      },
+                    });
+                  } else if (item.kind === "gratitude") {
+                    const g = item as GratitudeEntry & { kind: "gratitude" };
+                    router.push({
+                      pathname: "/thrive/gratitudedata",
+                      params: {
+                        id: g.id,
+                        text: g.text ?? "",
+                        created_at: g.created_at,
+                      },
+                    });
+                  } else if (item.kind === "outside_in") {
+                    const o = item as OutsideInEntry & { kind: "outside_in" };
+                    router.push({
+                      pathname: "/thrive/outsidethinkingdata",
+                      params: {
+                        id: o.id,
+                        prompt_id: o.prompt_id,
+                        action_text: o.action_text,
+                        created_at: o.created_at,
+                      },
+                    });
                   }
                 }}
               />
@@ -222,6 +325,7 @@ export default function AccessAllDataScreen() {
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
   );
+
 }
 
 function EntryRow({

@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useRouter } from "expo-router"; // Importing the Expo Router to navigate between screens
+import React, { useEffect, useState } from "react"; // Importing React and useState to manage component state
 import {
   Image,
   Platform,
@@ -8,12 +8,38 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import SideDrawer from "./components/SideDrawer";
+} from "react-native"; // Importing React Native components used in the UI
+import { API_BASE } from "../lib/api";
+import SideDrawer from "./components/SideDrawer"; // Importing the custom side drawer menu component
 
 export default function Home() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false); // State to track whether the side drawer is open or closed
+  const router = useRouter();  // Router used for navigation between screens
+
+type Quote = { quote_text: string; author: string };
+
+const [quote, setQuote] = useState<Quote | null>(null);
+const [loadingQuote, setLoadingQuote] = useState(true);
+
+useEffect(() => {
+  const loadQuote = async () => {
+    try {
+      setLoadingQuote(true);
+      const res = await fetch(`${API_BASE}/quotes/random`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: Quote = await res.json();
+      setQuote(data);
+    } catch (e) {
+      console.error("Quote fetch failed:", e);
+      setQuote(null);
+    } finally {
+      setLoadingQuote(false);
+    }
+  };
+
+  loadQuote();
+}, []);
+
 
   return (
     <View style={styles.root}>
@@ -78,10 +104,20 @@ export default function Home() {
         {/* Daily Motivation Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Daily Motivation</Text>
-          <Text style={styles.cardBody}>
-            Progress is built from small,{"\n"}consistent steps.
-          </Text>
+
+          {loadingQuote ? (
+            <Text style={styles.cardBody}>Loading…</Text>
+          ) : quote ? (
+            <>
+              <Text style={styles.cardBody}>
+                {quote.quote_text}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.cardBody}>—</Text>
+          )}
         </View>
+
       </ScrollView>
 
       {/* Drawer LAST = renders on top */}
@@ -245,5 +281,6 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     color: SUBTLE,
     textAlign: "center",
+    fontStyle: "italic",
   },
 });

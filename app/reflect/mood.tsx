@@ -58,7 +58,7 @@ export default function MoodJournalScreen() {
       };
 
       //console for debugging if anything goes wrong
-      console.log("POST /entries →", API_BASE, payload);
+      console.log("POST /mood_entries →", API_BASE, payload);
 
       await createMoodEntry(payload);
 

@@ -19,12 +19,12 @@ export default function ThriveScreen() {
     {
       title: "Mood Insights & Graphs",
       desc: "See your mood patterns over time with simple, clear visuals.",
-      // onPress: () => router.push("/thrive/mood-insights"),
+      
     },
     {
       title: "Weekly Summary",
       desc: "Get a quick snapshot of your week – highs, lows, and progress.",
-      // onPress: () => router.push("/thrive/weekly-summary"),
+      
     },
     {
       title: "Access All Data",
@@ -34,12 +34,12 @@ export default function ThriveScreen() {
     {
       title: "Export & Share",
       desc: "Export or share your progress if you’d like extra support.",
-      // onPress: () => router.push("/thrive/export-share"),
+      
     },
     {
       title: "Resources Hub",
       desc: "Find helpful supports, links, and information when you need it.",
-      // onPress: () => router.push("/thrive/resources"),
+      
     },
   ];
 
@@ -50,7 +50,7 @@ export default function ThriveScreen() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* ----- Header (same as other screens) ----- */}
+        {/* ----- Header  ----- */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
@@ -124,9 +124,9 @@ function ThriveCard({
 }
 
 /* Theme – pink tones for Thrive */
-const BG = "#fff5f9"; // very soft pink background
+const BG = "#fff5f9"; 
 const CARD_BG = "#ffffff";
-const PINK = "#f06292"; // main Thrive accent
+const PINK = "#f06292"; 
 const CHEV_BG = "#ffe0ec";
 const SHADOW = "#000";
 const TEXT = "#222";

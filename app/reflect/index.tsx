@@ -21,7 +21,9 @@ export default function ReflectScreen() {
       desc: "Take 30 seconds to note how you feel – it helps you spot patterns.",
       onPress: () => router.push("/reflect/mood"),
     },
-    { title: "Trap & Track", desc: "Catch an unhelpful thought and reframe it." },
+    { title: "Trap & Track", 
+      desc: "Catch an unhelpful thought and reframe it.", 
+      onPress: () => router.push("/reflect/trap_track") },
     {
       title: "Daily Reflection & Positive Thoughts",
       desc: "End your day by focusing on the wins, not the worries.",
@@ -30,10 +32,12 @@ export default function ReflectScreen() {
     {
       title: "Outside-In Thinking",
       desc: "Small actions can shift big feelings – what's one thing you could do tomorrow?",
+      onPress: () => router.push("/reflect/outsidethinking"),
     },
     {
       title: "Daily Gratitude",
       desc: "Train your brain to notice the good – What are you grateful for today?",
+      onPress: () => router.push("/reflect/gratitude")
     },
   ];
 
@@ -119,7 +123,7 @@ function ReflectCard({
 
 /* Theme */
 const BG = "#fff5f7";      
-const CARD_BG = "#ffffff"; // white card
+const CARD_BG = "#ffffff"; 
 const PURPLE = "#8f79ea";
 const SHADOW = "#000";
 const TEXT = "#222";
@@ -128,14 +132,14 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55, // same as Home
+    paddingTop: Platform.OS === "android" ? 35 : 55, 
   },
   container: {
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
 
-  /* Header (identical to Home) */
+  /* Header */
   header: {
     flexDirection: "row",
     alignItems: "center",

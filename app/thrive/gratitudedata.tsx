@@ -1,29 +1,27 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
 
-
-export default function MoodEntryDataScreen() {
+export default function GratitudeDataScreen() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const params = useLocalSearchParams<{
     id?: string;
-    mood?: string;
-    notes?: string;
     created_at?: string;
+    text?: string;
   }>();
 
   const { niceDate, niceTime } = useMemo(
@@ -31,34 +29,34 @@ export default function MoodEntryDataScreen() {
     [params.created_at]
   );
 
+  const [value, setValue] = useState(params.text ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [notesValue, setNotesValue] = useState(params.notes ?? "");
-
-  const moodLabel = params.mood ?? "Mood Entry";
 
   async function handleSave() {
     if (!params.id) return;
 
+    const trimmed = value.trim();
+    if (!trimmed) {
+      Alert.alert("Add something", "Gratitude text can’t be empty.");
+      return;
+    }
+
     try {
       setSaving(true);
-      const res = await fetch(`${API_BASE}/mood_entries/${params.id}`, {
+
+      const res = await fetch(`${API_BASE}/gratitude_entries/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mood: params.mood ?? "Mood Entry",
-          notes: notesValue,
-        }),
+        body: JSON.stringify({ text: trimmed }),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved", "Your entry has been updated.");
+      Alert.alert("Saved", "Your gratitude has been updated.");
       setIsEditing(false);
     } catch (e) {
-      console.log("Update error", e);
+      console.log("Gratitude update error", e);
       Alert.alert("Oops", "Could not save changes. Please try again.");
     } finally {
       setSaving(false);
@@ -68,46 +66,31 @@ export default function MoodEntryDataScreen() {
   function confirmDelete() {
     if (!params.id) return;
 
-    Alert.alert(
-      "Delete entry?",
-      "This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => handleDelete(params.id!),
-        },
-      ],
-      { cancelable: true }
-    );
+    Alert.alert("Delete entry?", "This cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => handleDelete(params.id!) },
+    ]);
   }
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/mood_entries/${id}`, {
+      const res = await fetch(`${API_BASE}/gratitude_entries/${id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok && res.status !== 204) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Deleted", "Your entry has been deleted.");
-      // go back to Access All Data screen
+      Alert.alert("Deleted", "Your gratitude has been deleted.");
       router.replace("/thrive/accessalldata");
     } catch (e) {
-      console.log("Delete error", e);
+      console.log("Gratitude delete error", e);
       Alert.alert("Oops", "Could not delete entry. Please try again.");
     }
   }
 
   return (
     <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -119,61 +102,58 @@ export default function MoodEntryDataScreen() {
 
           <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
             <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
           </Pressable>
         </View>
 
-        {/* Back + title row */}
+        {/* Back + title */}
         <View style={styles.titleRow}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>{moodLabel}</Text>
+            <Text style={styles.title}>Daily Gratitude</Text>
             <Text style={styles.subtitle}>
               {niceDate} — {niceTime}
             </Text>
           </View>
 
-          {/* Emoji on the right */}
           <View style={styles.emojiBubble}>
-            <Text style={{ fontSize: 26 }}>😊</Text>
+            <Text style={{ fontSize: 22 }}>🙏</Text>
           </View>
         </View>
 
-        {/* Notes bubble */}
-        <View style={styles.notesBubble}>
-          {isEditing ? (
-            <TextInput
-              value={notesValue}
-              onChangeText={setNotesValue}
-              multiline
-              placeholder="Write your thoughts here..."
-              style={styles.notesInput}
-            />
-          ) : (
-            <Text style={styles.notesText}>
-              {notesValue.trim().length > 0
-                ? notesValue
-                : "No extra notes added for this entry."}
-            </Text>
-          )}
+        {/* Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Today I’m grateful for…</Text>
+          <View style={styles.cardInner}>
+            {isEditing ? (
+              <TextInput
+                value={value}
+                onChangeText={setValue}
+                multiline
+                style={styles.cardInput}
+                placeholder="Write one thing you’re grateful for."
+                placeholderTextColor="#b9a5ff"
+              />
+            ) : (
+              <Text style={styles.cardText}>
+                {value.trim().length > 0 ? value : "No gratitude text saved."}
+              </Text>
+            )}
+          </View>
         </View>
 
         {/* Buttons */}
-        <View style={{ marginTop: 60 }}>
+        <View style={{ marginTop: 26 }}>
           <Pressable
             style={styles.primaryButton}
             onPress={() => {
               if (isEditing) {
-                // save changes
-                if (!saving) {
-                  handleSave();
-                }
+                if (!saving) handleSave();
               } else {
-                // enter edit mode
                 setIsEditing(true);
               }
             }}
@@ -183,10 +163,7 @@ export default function MoodEntryDataScreen() {
             </Text>
           </Pressable>
 
-          <Pressable
-            style={styles.secondaryButton}
-            onPress={confirmDelete}
-          >
+          <Pressable style={styles.secondaryButton} onPress={confirmDelete}>
             <Text style={styles.secondaryButtonText}>Delete Entry</Text>
           </Pressable>
         </View>
@@ -198,9 +175,7 @@ export default function MoodEntryDataScreen() {
 }
 
 function formatDate(raw?: string) {
-  if (!raw) {
-    return { niceDate: "", niceTime: "" };
-  }
+  if (!raw) return { niceDate: "", niceTime: "" };
   const d = new Date(raw);
   const niceDate = d.toLocaleDateString("en-IE", {
     weekday: "short",
@@ -215,11 +190,11 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Pink theme */
-const BG = "#fff5f9";
+const BG = "#fff5f7";
 const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const BUTTON_PINK = "#f48fb1";
+const INNER_BG = "#f6edff";
+const PURPLE = "#8f79ea";
+const BUTTON_PURPLE = "#b49cff";
 const SHADOW = "#000";
 const TEXT = "#222";
 
@@ -233,7 +208,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -268,19 +242,14 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 12,
   },
-  backBtn: {
-    paddingRight: 10,
-  },
-  backArrow: {
-    fontSize: 26,
-    color: TEXT,
-  },
+  backBtn: { paddingRight: 10 },
+  backArrow: { fontSize: 26, color: TEXT },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
-    color: PINK,
+    color: PURPLE,
     textAlign: "center",
   },
   subtitle: {
@@ -289,61 +258,55 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   emojiBubble: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "#fff5d9",
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
   },
 
-  notesBubble: {
-    marginTop: 24,
+  card: {
     backgroundColor: CARD_BG,
-    borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 16,
+    borderRadius: 22,
+    padding: 16,
+    marginTop: 16,
     shadowColor: SHADOW,
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  notesText: {
+  cardLabel: {
     fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
+    fontWeight: "800",
+    color: PURPLE,
+    marginBottom: 10,
   },
-  notesInput: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
-    minHeight: 120,
-    textAlignVertical: "top",
+  cardInner: {
+    backgroundColor: INNER_BG,
+    borderRadius: 18,
+    padding: 12,
+    minHeight: 140,
+    justifyContent: "flex-start",
   },
+  cardText: { fontSize: 14, color: PURPLE },
+  cardInput: { fontSize: 14, color: PURPLE, textAlignVertical: "top" },
 
   primaryButton: {
-    backgroundColor: BUTTON_PINK,
+    backgroundColor: BUTTON_PURPLE,
     borderRadius: 24,
     paddingVertical: 12,
     alignItems: "center",
     marginBottom: 16,
   },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  primaryButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
   secondaryButton: {
     backgroundColor: "#f8bbd0",
     borderRadius: 24,
     paddingVertical: 12,
     alignItems: "center",
   },
-  secondaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  secondaryButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

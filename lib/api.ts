@@ -41,7 +41,7 @@ export async function createMoodEntry(input: {
   mood: string;
   notes?: string;
 }) {
-  return http(`${API_BASE}/entries`, {
+  return http(`${API_BASE}/mood_entries`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -50,7 +50,7 @@ export async function createMoodEntry(input: {
 
 export async function listMoodEntries(user_id?: string) {
   const url = user_id
-    ? `${API_BASE}/entries?user_id=${encodeURIComponent(user_id)}`
-    : `${API_BASE}/entries`;
+    ? `${API_BASE}/mood_entries?user_id=${encodeURIComponent(user_id)}`
+    : `${API_BASE}/mood_entries`;
   return http(url);
 }
