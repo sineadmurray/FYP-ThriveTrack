@@ -11,53 +11,43 @@ import {
 } from "react-native";
 import SideDrawer from "../components/SideDrawer";
 
-export default function ThriveScreen() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const router = useRouter();
+export default function GrowScreen() {
+ const [drawerOpen, setDrawerOpen] = useState(false);
+   const router = useRouter();
 
   const items: { title: string; desc: string; onPress?: () => void }[] = [
     {
-      title: "Mood Insights & Graphs",
-      desc: "See your mood patterns over time with simple, clear visuals.",
-      onPress: () => router.push("/thrive/moodinsights"),
+      title: "Where I Am Now / Where I Want to Be",
+      desc: "Reflect on your current state and where you’d like to grow.",
+      onPress: () => router.push("/grow/whereiam"),
+    },
+    { title: "Daily Planner", 
+      desc: "Reward  yourself for progress - even small wins", 
+      onPress: () => router.push("/grow/dailyplanner") },
+    {
+      title: "Weekly Reflection & Review",
+      desc: "Reflect on progress, lessons, and wins each week.",
+      onPress: () => router.push("/grow/weeklyreflection"),
     },
     {
-      title: "Weekly Summary",
-      desc: "Get a quick snapshot of your week – highs, lows, and progress.",
-      
-    },
-    {
-      title: "Access All Data",
-      desc: "View your past entries in one place to spot trends and reflect.",
-      onPress: () => router.push("/thrive/accessalldata"),
-    },
-    {
-      title: "Export & Share",
-      desc: "Export or share your progress if you’d like extra support.",
-      
-    },
-    {
-      title: "Resources Hub",
-      desc: "Find helpful supports, links, and information when you need it.",
-      onPress: () => router.push("/thrive/resources"),
+      title: "Long-Term Vision",
+      desc: "Visualise what success and balance look like for you.",
+      onPress: () => router.push("/grow/longtermvision"),
     },
   ];
 
   return (
     <View style={styles.root}>
       {/* Main content */}
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ----- Header  ----- */}
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        {/* ----- Header (identical to Home) ----- */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={styles.appTitle}>Reflect, Grow & Thrive</Text>
 
           {/* Hamburger */}
           <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
@@ -69,19 +59,19 @@ export default function ThriveScreen() {
 
         {/* ----- Hero ----- */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
-          <View style={styles.iconBadge}>
-            <Text style={{ fontSize: 22 }}>🌸</Text>
+          <View style={styles.mirrorBadge}>
+            <Text style={{ fontSize: 22 }}>🌱</Text>
           </View>
-          <Text style={styles.title}>Thrive</Text>
+          <Text style={styles.title}>Grow</Text>
           <Text style={styles.subtitle}>
-            See your progress, celebrate wins, and stay inspired.
+            Set small goals, build routines, and track your progress.
           </Text>
         </View>
 
         {/* ----- Cards ----- */}
         <View style={{ marginTop: 10 }}>
           {items.map((it, idx) => (
-            <ThriveCard
+            <GrowCard
               key={idx}
               title={it.title}
               desc={it.desc}
@@ -92,12 +82,15 @@ export default function ThriveScreen() {
       </ScrollView>
 
       {/* Drawer LAST so it sits on top */}
-      <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <SideDrawer
+        visible={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </View>
   );
 }
 
-function ThriveCard({
+function GrowCard({
   title,
   desc,
   onPress,
@@ -123,11 +116,11 @@ function ThriveCard({
   );
 }
 
-/* Theme – pink tones for Thrive */
-const BG = "#fff5f9"; 
+/* Grow Theme (Mint) */
+const BG = "#fbf6f8";        // soft mint background
 const CARD_BG = "#ffffff";
-const PINK = "#f06292"; 
-const CHEV_BG = "#ffe0ec";
+const MINT = "#9fe7c0";      // main Grow accent
+const MINT_SOFT = "#e8fbf1"; // soft mint accents
 const SHADOW = "#000";
 const TEXT = "#222";
 
@@ -175,7 +168,7 @@ const styles = StyleSheet.create({
   },
 
   /* Hero */
-  iconBadge: {
+  mirrorBadge: {
     width: 40,
     height: 40,
     borderRadius: 12,
@@ -193,7 +186,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     lineHeight: 40,
     fontWeight: "800",
-    color: PINK,
+    color: MINT,
     textAlign: "center",
     marginTop: 6,
   },
@@ -216,7 +209,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginVertical: 10,
     shadowColor: SHADOW,
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
@@ -225,7 +218,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 28,
     fontWeight: "800",
-    color: PINK,
+    color: MINT,
     marginBottom: 6,
   },
   cardDesc: {
@@ -237,7 +230,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: CHEV_BG,
+    backgroundColor: MINT_SOFT,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 10,

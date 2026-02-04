@@ -14,21 +14,14 @@ import {
 import { API_BASE, createMoodEntry } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
 
-type MoodKey =
-  | "exhausted"
-  | "anxious"
-  | "neutral"
-  | "content"
-  | "excited"
-  | "sad";
+type MoodKey = "struggling" | "low" | "okay" | "good" | "amazing";
 
-const MOODS: { key: MoodKey; emoji: string; label: string }[] = [
-  { key: "exhausted", emoji: "😩", label: "Exhausted" },
-  { key: "anxious", emoji: "😟", label: "Anxious" },
-  { key: "neutral", emoji: "😐", label: "Neutral" },
-  { key: "content", emoji: "🙂", label: "Content" },
-  { key: "excited", emoji: "🤩", label: "Excited" },
-  { key: "sad", emoji: "😭", label: "Sad" },
+const MOODS: { key: MoodKey; emoji: string; label: string; value: number }[] = [
+  { key: "struggling", emoji: "😣", label: "Struggling", value: 1 },
+  { key: "low", emoji: "😕", label: "Low", value: 2 },
+  { key: "okay", emoji: "😐", label: "Okay", value: 3 },
+  { key: "good", emoji: "🙂", label: "Good", value: 4 },
+  { key: "amazing", emoji: "🤩", label: "Amazing", value: 5 },
 ];
 
 export default function MoodJournalScreen() {
@@ -44,6 +37,12 @@ export default function MoodJournalScreen() {
       return;
     }
 
+    const selected = MOODS.find((m) => m.key === selectedMood);
+    if (!selected) {
+      Alert.alert("Error", "Could not determine mood value.");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -53,11 +52,12 @@ export default function MoodJournalScreen() {
       // TEMP user id — replace with real auth later
       const payload = {
         user_id: "demo-student-1",
-        mood: selectedMood, // string (matches API expectation)
+        mood: selectedMood, // string
+        mood_value: selected.value, // ✅ REQUIRED by backend
         notes: trimmed || undefined,
       };
 
-      //console for debugging if anything goes wrong
+      // console for debugging if anything goes wrong
       console.log("POST /mood_entries →", API_BASE, payload);
 
       await createMoodEntry(payload);
@@ -150,6 +150,7 @@ export default function MoodJournalScreen() {
               value={notes}
               onChangeText={setNotes}
               textAlignVertical="top"
+              maxLength={300}
             />
           </View>
           <Text style={styles.charCount}>{Math.min(notes.length, 300)}/300</Text>

@@ -91,7 +91,7 @@ useEffect(() => {
           label="Grow" 
             emoji="🌱" 
             bg="#cdeed6" 
-            onPress={() => {}} 
+            onPress={() => router.push("/grow")} 
             />
           <ActionCard 
           label="Thrive" 
