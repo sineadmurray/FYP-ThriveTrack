@@ -95,6 +95,77 @@ app.post('/init', async (_req, res) => {
       );
       CREATE INDEX IF NOT EXISTS idx_outside_in_actions_user ON outside_in_actions(user_id);
       CREATE INDEX IF NOT EXISTS idx_outside_in_actions_prompt ON outside_in_actions(prompt_id);
+
+      -- Where I Am Now / Where I Want To Be
+      CREATE TABLE IF NOT EXISTS where_i_am_reflections (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id TEXT NOT NULL,
+
+        mind_now TEXT,
+        mind_want TEXT,
+
+        body_now TEXT,
+        body_want TEXT,
+
+        career_now TEXT,
+        career_want TEXT,
+
+        relationships_now TEXT,
+        relationships_want TEXT,
+
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_where_i_am_user ON where_i_am_reflections(user_id);
+
+      -- Weekly Reflections & Review
+      CREATE TABLE IF NOT EXISTS weekly_reflections (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id TEXT NOT NULL,
+
+        mind TEXT,
+        body TEXT,
+        career TEXT,
+        relationships TEXT,
+
+        held_me_back TEXT,
+        lesson_learned TEXT,
+        next_weeks_focus TEXT,
+
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_weekly_reflections_user ON weekly_reflections(user_id);
+
+      -- Daily Planner
+      CREATE TABLE IF NOT EXISTS daily_plans (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id TEXT NOT NULL,
+
+        main_goal TEXT,
+        priority_1 TEXT,
+        priority_2 TEXT,
+        priority_3 TEXT,
+
+        other_todos TEXT,
+        self_care_actions TEXT,
+        productivity_reward TEXT,
+        notes TEXT,
+
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_daily_plans_user ON daily_plans(user_id);
+
+      -- Long-Term Vision
+      CREATE TABLE IF NOT EXISTS long_term_visions (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id TEXT NOT NULL,
+
+        vision TEXT,
+        clear_direction TEXT,
+
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_long_term_visions_user ON long_term_visions(user_id);
+
     `);
     res.json({ ok: true });
   } catch (e) {
@@ -106,20 +177,37 @@ app.post('/init', async (_req, res) => {
 // create mood entry
 app.post('/mood_entries', async (req, res) => {
   try {
-    const { user_id, mood, notes } = req.body;
-    if (!user_id || !mood) {
-      return res.status(400).json({ error: 'user_id and mood are required' });
+    const { user_id, mood, mood_value, notes } = req.body;
+
+    if (!user_id || !mood || !mood_value) {
+      return res.status(400).json({
+        error: 'user_id, mood, and mood_value are required'
+      });
     }
+
+    // safety: enforce valid range
+    if (mood_value < 1 || mood_value > 5) {
+      return res.status(400).json({
+        error: 'mood_value must be between 1 and 5'
+      });
+    }
+
     const { rows } = await pool.query(
-      'INSERT INTO mood_entries (user_id, mood, notes) VALUES ($1,$2,$3) RETURNING *',
-      [user_id, mood, notes ?? null]
+      `
+      INSERT INTO mood_entries (user_id, mood, mood_value, notes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+      `,
+      [user_id, mood, mood_value, notes ?? null]
     );
+
     res.status(201).json(rows[0]);
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'create_failed' });
   }
 });
+
 
 // list mood entries
 app.get('/mood_entries', async (req, res) => {
@@ -140,15 +228,30 @@ app.get('/mood_entries', async (req, res) => {
 app.put('/mood_entries/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { mood, notes } = req.body;
+    const { mood, mood_value, notes } = req.body;
 
-    if (!mood) {
-      return res.status(400).json({ error: 'mood is required' });
+    if (!mood || !mood_value) {
+      return res.status(400).json({
+        error: 'mood and mood_value are required'
+      });
+    }
+
+    if (mood_value < 1 || mood_value > 5) {
+      return res.status(400).json({
+        error: 'mood_value must be between 1 and 5'
+      });
     }
 
     const { rows } = await pool.query(
-      'UPDATE mood_entries SET mood=$2, notes=$3 WHERE id=$1 RETURNING *',
-      [id, mood, notes ?? null]
+      `
+      UPDATE mood_entries
+      SET mood=$2,
+          mood_value=$3,
+          notes=$4
+      WHERE id=$1
+      RETURNING *
+      `,
+      [id, mood, mood_value, notes ?? null]
     );
 
     if (rows.length === 0) {
@@ -161,6 +264,7 @@ app.put('/mood_entries/:id', async (req, res) => {
     res.status(500).json({ error: 'update_failed' });
   }
 });
+
 
 // delete one mood entry
 app.delete('/mood_entries/:id', async (req, res) => {
@@ -656,6 +760,436 @@ app.delete("/outside_in_actions/:id", async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "outside_in_action_delete_failed" });
+  }
+});
+
+
+// create where-i-am reflection
+app.post("/where_i_am_reflections", async (req, res) => {
+  try {
+    const {
+      user_id,
+      mind_now, mind_want,
+      body_now, body_want,
+      career_now, career_want,
+      relationships_now, relationships_want,
+    } = req.body;
+
+    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+
+    const { rows } = await pool.query(
+      `INSERT INTO where_i_am_reflections
+       (user_id, mind_now, mind_want, body_now, body_want, career_now, career_want, relationships_now, relationships_want)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING *`,
+      [
+        user_id,
+        mind_now ?? null, mind_want ?? null,
+        body_now ?? null, body_want ?? null,
+        career_now ?? null, career_want ?? null,
+        relationships_now ?? null, relationships_want ?? null,
+      ]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "whereiam_create_failed" });
+  }
+});
+
+// list where-i-am reflections
+app.get("/where_i_am_reflections", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const q = user_id
+      ? {
+          text: "SELECT * FROM where_i_am_reflections WHERE user_id=$1 ORDER BY created_at DESC",
+          values: [user_id],
+        }
+      : {
+          text: "SELECT * FROM where_i_am_reflections ORDER BY created_at DESC",
+          values: [],
+        };
+
+    const { rows } = await pool.query(q);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "whereiam_list_failed" });
+  }
+});
+
+// update one where-i-am reflection
+app.put("/where_i_am_reflections/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      mind_now, mind_want,
+      body_now, body_want,
+      career_now, career_want,
+      relationships_now, relationships_want,
+    } = req.body;
+
+    const { rows } = await pool.query(
+      `UPDATE where_i_am_reflections
+       SET mind_now=$2, mind_want=$3,
+           body_now=$4, body_want=$5,
+           career_now=$6, career_want=$7,
+           relationships_now=$8, relationships_want=$9
+       WHERE id=$1
+       RETURNING *`,
+      [
+        id,
+        mind_now ?? null, mind_want ?? null,
+        body_now ?? null, body_want ?? null,
+        career_now ?? null, career_want ?? null,
+        relationships_now ?? null, relationships_want ?? null,
+      ]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
+    res.json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "whereiam_update_failed" });
+  }
+});
+
+// delete one where_i_am_reflection
+app.delete("/where_i_am_reflections/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query("DELETE FROM where_i_am_reflections WHERE id=$1", [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+
+    res.status(204).send();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "whereiam_delete_failed" });
+  }
+});
+
+// create weekly reflection
+app.post("/weekly_reflections", async (req, res) => {
+  try {
+    const {
+      user_id,
+      mind, body, career, relationships,
+      held_me_back,
+      lesson_learned,
+      next_weeks_focus,
+    } = req.body;
+
+    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+
+    const { rows } = await pool.query(
+      `INSERT INTO weekly_reflections
+       (user_id, mind, body, career, relationships, held_me_back, lesson_learned, next_weeks_focus)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       RETURNING *`,
+      [
+        user_id,
+        mind ?? null,
+        body ?? null,
+        career ?? null,
+        relationships ?? null,
+        held_me_back ?? null,
+        lesson_learned ?? null,
+        next_weeks_focus ?? null,
+      ]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "weekly_create_failed" });
+  }
+});
+
+// list weekly reflections
+app.get("/weekly_reflections", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const q = user_id
+      ? {
+          text: "SELECT * FROM weekly_reflections WHERE user_id=$1 ORDER BY created_at DESC",
+          values: [user_id],
+        }
+      : {
+          text: "SELECT * FROM weekly_reflections ORDER BY created_at DESC",
+          values: [],
+        };
+
+    const { rows } = await pool.query(q);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "weekly_list_failed" });
+  }
+});
+
+// update one weekly reflection
+app.put("/weekly_reflections/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      mind, body, career, relationships,
+      held_me_back,
+      lesson_learned,
+      next_weeks_focus,
+    } = req.body;
+
+    const { rows } = await pool.query(
+      `UPDATE weekly_reflections
+       SET mind=$2, body=$3, career=$4, relationships=$5,
+           held_me_back=$6, lesson_learned=$7, next_weeks_focus=$8
+       WHERE id=$1
+       RETURNING *`,
+      [
+        id,
+        mind ?? null,
+        body ?? null,
+        career ?? null,
+        relationships ?? null,
+        held_me_back ?? null,
+        lesson_learned ?? null,
+        next_weeks_focus ?? null,
+      ]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
+    res.json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "weekly_update_failed" });
+  }
+});
+
+// delete one weekly reflection
+app.delete("/weekly_reflections/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query("DELETE FROM weekly_reflections WHERE id=$1", [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+
+    res.status(204).send();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "weekly_delete_failed" });
+  }
+});
+
+// create daily plan
+app.post("/daily_plans", async (req, res) => {
+  try {
+    const {
+      user_id,
+      main_goal,
+      priority_1,
+      priority_2,
+      priority_3,
+      other_todos,
+      self_care_actions,
+      productivity_reward,
+      notes,
+    } = req.body;
+
+    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+
+    const { rows } = await pool.query(
+      `INSERT INTO daily_plans
+       (user_id, main_goal, priority_1, priority_2, priority_3, other_todos, self_care_actions, productivity_reward, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING *`,
+      [
+        user_id,
+        main_goal ?? null,
+        priority_1 ?? null,
+        priority_2 ?? null,
+        priority_3 ?? null,
+        other_todos ?? null,
+        self_care_actions ?? null,
+        productivity_reward ?? null,
+        notes ?? null,
+      ]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "dailyplan_create_failed" });
+  }
+});
+
+// list daily plans
+app.get("/daily_plans", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const q = user_id
+      ? {
+          text: "SELECT * FROM daily_plans WHERE user_id=$1 ORDER BY created_at DESC",
+          values: [user_id],
+        }
+      : {
+          text: "SELECT * FROM daily_plans ORDER BY created_at DESC",
+          values: [],
+        };
+
+    const { rows } = await pool.query(q);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "dailyplan_list_failed" });
+  }
+});
+
+// update one daily plan
+app.put("/daily_plans/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      main_goal,
+      priority_1,
+      priority_2,
+      priority_3,
+      other_todos,
+      self_care_actions,
+      productivity_reward,
+      notes,
+    } = req.body;
+
+    const { rows } = await pool.query(
+      `UPDATE daily_plans
+       SET main_goal=$2,
+           priority_1=$3,
+           priority_2=$4,
+           priority_3=$5,
+           other_todos=$6,
+           self_care_actions=$7,
+           productivity_reward=$8,
+           notes=$9
+       WHERE id=$1
+       RETURNING *`,
+      [
+        id,
+        main_goal ?? null,
+        priority_1 ?? null,
+        priority_2 ?? null,
+        priority_3 ?? null,
+        other_todos ?? null,
+        self_care_actions ?? null,
+        productivity_reward ?? null,
+        notes ?? null,
+      ]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
+    res.json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "dailyplan_update_failed" });
+  }
+});
+
+// delete one daily plan
+app.delete("/daily_plans/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query("DELETE FROM daily_plans WHERE id=$1", [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+
+    res.status(204).send();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "dailyplan_delete_failed" });
+  }
+});
+
+// create long-term vision
+app.post("/long_term_visions", async (req, res) => {
+  try {
+    const { user_id, vision, clear_direction } = req.body;
+
+    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+
+    const { rows } = await pool.query(
+      `INSERT INTO long_term_visions (user_id, vision, clear_direction)
+       VALUES ($1,$2,$3)
+       RETURNING *`,
+      [user_id, vision ?? null, clear_direction ?? null]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "ltv_create_failed" });
+  }
+});
+
+// list long-term visions
+app.get("/long_term_visions", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const q = user_id
+      ? {
+          text: "SELECT * FROM long_term_visions WHERE user_id=$1 ORDER BY created_at DESC",
+          values: [user_id],
+        }
+      : {
+          text: "SELECT * FROM long_term_visions ORDER BY created_at DESC",
+          values: [],
+        };
+
+    const { rows } = await pool.query(q);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "ltv_list_failed" });
+  }
+});
+
+// update one long-term vision
+app.put("/long_term_visions/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { vision, clear_direction } = req.body;
+
+    const { rows } = await pool.query(
+      `UPDATE long_term_visions
+       SET vision=$2, clear_direction=$3
+       WHERE id=$1
+       RETURNING *`,
+      [id, vision ?? null, clear_direction ?? null]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
+    res.json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "ltv_update_failed" });
+  }
+});
+
+// delete one long-term vision
+app.delete("/long_term_visions/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query("DELETE FROM long_term_visions WHERE id=$1", [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+
+    res.status(204).send();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "ltv_delete_failed" });
   }
 });
 
