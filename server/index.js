@@ -27,12 +27,14 @@ const pool = new Pool({
 // Used to confirm the API and database are online.
 app.get('/health', async (_req, res) => {
   try {
-    await pool.query('SELECT 1'); // Simple query to ensure DB works
+    await pool.query('SELECT 1');
     res.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error("HEALTH CHECK DB ERROR:", e);
     res.status(500).json({ ok: false });
   }
 });
+
 
 // init
 // This route sets up all the tables in PostgreSQL.
