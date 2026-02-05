@@ -14,12 +14,14 @@ app.use(express.json()); // Parse incoming JSON in request bodies
 app.use(morgan('dev')); // Log every request in the terminal (useful for debugging)
 
 console.log("DATABASE_URL =", process.env.DATABASE_URL); // Log the connection string for debugging purposes
-const pool = new Pool({ // Create a PostgreSQL connection pool
+const pool = new Pool({
   connectionString:
-    process.env.DATABASE_URL || 
-    "postgresql://sineadmurray@localhost:5432/thrivetrack", // fallback for local dev
+    process.env.DATABASE_URL ||
+    "postgresql://sineadmurray@localhost:5432/thrivetrack",
+  ssl: process.env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false,
 });
-
 
 // health
 // Used to confirm the API and database are online.
