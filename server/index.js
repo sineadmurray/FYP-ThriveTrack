@@ -1197,6 +1197,62 @@ app.delete("/long_term_visions/:id", async (req, res) => {
   }
 });
 
+// WEEKLY SUMMARY (last 7 days)
+// Returns counts for Mood Logs, Reflect Entries, and Grow Entries (grouped).
+app.get("/weekly_summary", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    if (!user_id) {
+      return res.status(400).json({ error: "user_id is required" });
+    }
+
+    // Postgres will handle the "last 7 days" window
+    const since = "NOW() - INTERVAL '7 days'";
+
+    // Mood logs = mood_entries
+    const moodCountResult = await pool.query(
+      `SELECT COUNT(*)::int AS count
+       FROM mood_entries
+       WHERE user_id = $1 AND created_at >= ${since}`,
+      [user_id]
+    );
+
+    // Reflect entries (Reflect section)
+    // This includes: end_of_day_reflections, gratitude_entries, trap_and_track, outside_in_actions
+    const reflectCountResult = await pool.query(
+      `SELECT (
+          (SELECT COUNT(*) FROM end_of_day_reflections WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM gratitude_entries       WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM trap_and_track          WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM outside_in_actions      WHERE user_id=$1 AND created_at >= ${since})
+        )::int AS count`,
+      [user_id]
+    );
+
+    // Grow entries (Grow section)
+    // This includes: daily_plans, long_term_visions, where_i_am_reflections, weekly_reflections
+    const growCountResult = await pool.query(
+      `SELECT (
+          (SELECT COUNT(*) FROM daily_plans            WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM long_term_visions      WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM where_i_am_reflections WHERE user_id=$1 AND created_at >= ${since}) +
+          (SELECT COUNT(*) FROM weekly_reflections     WHERE user_id=$1 AND created_at >= ${since})
+        )::int AS count`,
+      [user_id]
+    );
+
+    res.json({
+      moodCount: moodCountResult.rows[0].count,
+      reflectCount: reflectCountResult.rows[0].count,
+      growCount: growCountResult.rows[0].count,
+    });
+  } catch (e) {
+    console.error("weekly_summary error:", e);
+    res.status(500).json({ error: "weekly_summary_failed" });
+  }
+});
+
 
 const port = process.env.PORT || 4000;
 
