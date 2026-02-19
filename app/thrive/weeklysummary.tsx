@@ -112,16 +112,6 @@ export default function WeeklySummaryScreen() {
   const growEntries = data?.growCount ?? 0;
 
   const isEmpty = !loading && !errorMsg && moodLogs === 0 && reflectEntries === 0 && growEntries === 0;
-
-  const BulletList = ({ items }: { items: string[] }) => (
-    <View style={{ gap: 8 }}>
-      {items.map((t, i) => (
-        <Text key={i} style={styles.bodyText}>
-          {"• "}{t}
-        </Text>
-      ))}
-    </View>
-  );
   
   
   return (
@@ -225,7 +215,9 @@ export default function WeeklySummaryScreen() {
             {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
             {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <BulletList items={aiSummary.overallMoodTrend} />
+              <Text style={styles.bodyText}>
+              {aiSummary.overallMoodTrend}
+            </Text>
             )}
           </View>
         )}
@@ -236,7 +228,9 @@ export default function WeeklySummaryScreen() {
             {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
             {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <BulletList items={aiSummary.whatFeltPositive} />
+              <Text style={styles.bodyText}>
+              {aiSummary.whatFeltPositive}
+            </Text>
             )}
           </View>
         )}
@@ -247,7 +241,9 @@ export default function WeeklySummaryScreen() {
             {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
             {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <BulletList items={aiSummary.whatFeltChallenging} />
+              <Text style={styles.bodyText}>
+              {aiSummary.whatFeltChallenging}
+            </Text>
             )}
           </View>
         )}
