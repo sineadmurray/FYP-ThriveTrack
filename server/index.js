@@ -3,6 +3,10 @@ import express from 'express'; // Import the main server framework
 import cors from 'cors'; // CORS allows mobile app to connect to your API from a different origin
 import pkg from 'pg'; // PostgreSQL client library
 import morgan from 'morgan'; // HTTP request logger (shows GET, POST, etc. in the terminal)
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 
 const { Pool } = pkg; // Extract the Pool class (used for database connections)
 
@@ -1252,6 +1256,129 @@ app.get("/weekly_summary", async (req, res) => {
     res.status(500).json({ error: "weekly_summary_failed" });
   }
 });
+
+//** code sourced from chatgpt conversation **// 
+//....//
+app.post("/weekly_summary_ai", async (req, res) => {
+  try {
+    const { user_id } = req.body; // send user_id in body (or switch to auth later)
+    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+
+    // 1) Pull last 7 days of *actual content* from the DB
+    // Keep this minimal to reduce tokens + protect privacy.
+    const since = "NOW() - INTERVAL '7 days'";
+
+    const moods = await pool.query(
+      `SELECT mood, mood_value, notes, created_at
+       FROM mood_entries
+       WHERE user_id=$1 AND created_at >= ${since}
+       ORDER BY created_at ASC`,
+      [user_id]
+    );
+
+    const eod = await pool.query(
+      `SELECT went_well, learned, proud_of, self_care, created_at
+       FROM end_of_day_reflections
+       WHERE user_id=$1 AND created_at >= ${since}
+       ORDER BY created_at ASC`,
+      [user_id]
+    );
+
+    const gratitude = await pool.query(
+      `SELECT text, created_at
+       FROM gratitude_entries
+       WHERE user_id=$1 AND created_at >= ${since}
+       ORDER BY created_at ASC`,
+      [user_id]
+    );
+
+    const growWeekly = await pool.query(
+      `SELECT mind, body, career, relationships, held_me_back, lesson_learned, next_weeks_focus, created_at
+       FROM weekly_reflections
+       WHERE user_id=$1 AND created_at >= ${since}
+       ORDER BY created_at ASC`,
+      [user_id]
+    );
+
+    // Combine into one payload for the model
+    const weeklyData = {
+      moods: moods.rows,
+      endOfDayReflections: eod.rows,
+      gratitude: gratitude.rows,
+      weeklyReflections: growWeekly.rows,
+    };
+
+    // 2) Define a strict output shape (so your RN UI can render bullet lists reliably)
+    const schema = {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        overallMoodTrend: { type: "array", items: { type: "string" } },
+        whatFeltPositive: { type: "array", items: { type: "string" } },
+        whatFeltChallenging: { type: "array", items: { type: "string" } },
+        gentleSuggestion: { type: "array", items: { type: "string" } },
+        note: { type: "string" }
+      },
+      required: [
+        "overallMoodTrend",
+        "whatFeltPositive",
+        "whatFeltChallenging",
+        "gentleSuggestion",
+        "note"
+      ]
+    };
+
+    // 3) Call OpenAI (Responses API) to generate the weekly summary
+    const instructions = `
+You are a supportive wellbeing writing assistant for university students.
+
+Write in a warm, encouraging, non-clinical tone.
+
+Rules:
+- Do not diagnose or mention mental health disorders.
+- Do not give medical advice.
+- Keep bullets short and practical (max ~18 words each).
+- If the text indicates self-harm intent, respond with a brief safety message encouraging contacting local emergency services or a trusted person.
+`;
+
+    const ai = await openai.responses.create({
+      model: "gpt-4o-mini",
+      instructions,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text:
+                "Create a weekly wellbeing summary from the following last-7-days data (JSON):\n\n" +
+                JSON.stringify(weeklyData)
+            }
+          ]
+        }
+      ],
+      text: {
+        format: {
+          type: "json_schema",
+          strict: true,
+          schema
+        }
+      },
+      max_output_tokens: 350
+    });
+
+    // 4) Convert the model output into a JS object
+    const summary = JSON.parse(ai.output_text);
+
+    // 5) Send it back to the app
+    res.json({ summary });
+  } catch (e) {
+    console.error("weekly_summary_ai error:", e);
+    res.status(500).json({ error: "weekly_summary_ai_failed" });
+  }
+});
+//....//
+//** code sourced from chatgpt conversation **// 
 
 
 const port = process.env.PORT || 4000;
