@@ -348,9 +348,9 @@ export default function MoodInsightsScreen() {
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backRow}>
-          <Text style={styles.backArrow}>‹</Text>
-        </Pressable>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backArrow}>‹</Text>
+          </Pressable>
 
         {/* Title */}
         <View style={{ alignItems: "center", marginTop: 4 }}>
@@ -626,6 +626,10 @@ const styles = StyleSheet.create({
     color: PINK,
     marginTop: -2,
   },
+  backBtn: {
+    paddingRight: 8,
+    paddingTop: 4,
+  },
 
   iconTop: {
     fontSize: 34,
@@ -858,4 +862,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "700",
   },
+
 });

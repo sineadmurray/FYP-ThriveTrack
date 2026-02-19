@@ -4,12 +4,15 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
@@ -109,7 +112,7 @@ export default function OutsideThinking() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved 💜", "Your action has been saved.", [
+      Alert.alert("Saved ✅", "Your action has been saved.", [
         { text: "OK", onPress: () => router.back() },
       ]);
 
@@ -123,11 +126,18 @@ export default function OutsideThinking() {
   }
 
   return (
-    <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.root}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -270,6 +280,8 @@ export default function OutsideThinking() {
 
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
   );
 }
 

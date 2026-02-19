@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
@@ -81,7 +81,7 @@ export default function WeeklyReflectionDataScreen() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved", "Your weekly reflection has been updated.");
+      Alert.alert("Saved ✅", "Your weekly reflection has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("Weekly reflection update error", e);

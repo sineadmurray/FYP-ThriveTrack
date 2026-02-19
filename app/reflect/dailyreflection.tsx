@@ -1,15 +1,18 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
@@ -46,7 +49,7 @@ export default function DailyReflectionScreen() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      Alert.alert("Saved", "Your daily reflection has been saved.", [
+      Alert.alert("Saved✅", "Your daily reflection has been saved.", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (e) {
@@ -58,8 +61,18 @@ export default function DailyReflectionScreen() {
   }
 
   return (
-    <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.root}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -134,6 +147,8 @@ export default function DailyReflectionScreen() {
 
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
   );
 }
 

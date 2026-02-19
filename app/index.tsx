@@ -210,17 +210,18 @@ useEffect(() => {
 
               <View style={styles.latestMoodBox}>
                 <Text style={styles.latestMoodLabel}>Latest mood</Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+
+                <View style={styles.latestMoodRow}>
                   {latestMood && (
-                    <Text style={{ fontSize: 20 }}>{moodEmoji}</Text>
+                    <Text style={styles.latestMoodEmoji}>{moodEmoji}</Text>
                   )}
+
                   <Text style={styles.latestMoodText}>
                     {latestMood
                       ? `${latestMood.mood}${latestMood.notes ? ` — ${latestMood.notes}` : ""}`
                       : "No mood logged yet"}
                   </Text>
                 </View>
-
               </View>
 
               <View style={styles.quickRow}>
@@ -496,6 +497,11 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontSize: 16,
   },
+  latestMoodRow: {
+    flexDirection: "row",
+    alignItems: "flex-start", 
+    gap: 8,
+  },  
   latestMoodBox: {
     marginTop: 12,
     backgroundColor: "#fdeff2",
@@ -508,10 +514,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   latestMoodText: {
+    flex: 1,          
+    flexShrink: 1,    
+    flexWrap: "wrap", 
     color: "#2b2f36",
     fontWeight: "800",
     fontSize: 16,
+    lineHeight: 22,   
   },
+  latestMoodEmoji: {
+    fontSize: 20,
+    marginTop: 2, 
+  },  
   quickRow: {
     flexDirection: "row",
     gap: 12,

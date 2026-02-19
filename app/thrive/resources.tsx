@@ -244,10 +244,9 @@ export default function ResourcesScreen() {
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backRow}>
-          <Text style={styles.backArrow}>‹</Text>
-          <Text style={styles.backText}>Back to Thrive</Text>
-        </Pressable>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backArrow}>‹</Text>
+          </Pressable>
 
         {/* Hero */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
@@ -408,6 +407,10 @@ const styles = StyleSheet.create({
     color: PINK,
     fontSize: 18,
     fontWeight: "600",
+  },
+  backBtn: {
+    paddingRight: 8,
+    paddingTop: 4,
   },
 
   /* Hero (copied style) */

@@ -64,7 +64,7 @@ export default function EodEntryDataScreen() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      Alert.alert("Saved", "Your reflection has been updated.");
+      Alert.alert("Saved ✅", "Your reflection has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("EOD update error", e);

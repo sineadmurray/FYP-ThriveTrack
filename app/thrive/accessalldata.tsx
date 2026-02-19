@@ -263,7 +263,7 @@ export default function AccessAllDataScreen() {
 
         {/* Back + title */}
         <View style={styles.pageHeader}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backArrow}>‹</Text>
           </Pressable>
 

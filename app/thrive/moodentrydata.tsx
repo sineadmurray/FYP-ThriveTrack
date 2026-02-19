@@ -55,7 +55,7 @@ export default function MoodEntryDataScreen() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      Alert.alert("Saved", "Your entry has been updated.");
+      Alert.alert("Saved ✅", "Your entry has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("Update error", e);

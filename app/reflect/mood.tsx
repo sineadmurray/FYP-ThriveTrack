@@ -3,25 +3,28 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { API_BASE, createMoodEntry } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
 
-type MoodKey = "struggling" | "low" | "okay" | "good" | "amazing";
+type MoodKey = "Struggling" | "Low" | "Okay" | "Good" | "Amazing";
 
 const MOODS: { key: MoodKey; emoji: string; label: string; value: number }[] = [
-  { key: "struggling", emoji: "😣", label: "Struggling", value: 1 },
-  { key: "low", emoji: "😕", label: "Low", value: 2 },
-  { key: "okay", emoji: "😐", label: "Okay", value: 3 },
-  { key: "good", emoji: "🙂", label: "Good", value: 4 },
-  { key: "amazing", emoji: "🤩", label: "Amazing", value: 5 },
+  { key: "Struggling", emoji: "😣", label: "Struggling", value: 1 },
+  { key: "Low", emoji: "😕", label: "Low", value: 2 },
+  { key: "Okay", emoji: "😐", label: "Okay", value: 3 },
+  { key: "Good", emoji: "🙂", label: "Good", value: 4 },
+  { key: "Amazing", emoji: "🤩", label: "Amazing", value: 5 },
 ];
 
 export default function MoodJournalScreen() {
@@ -75,11 +78,18 @@ export default function MoodJournalScreen() {
   }
 
   return (
-    <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.root}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -186,6 +196,8 @@ export default function MoodJournalScreen() {
       {/* Drawer */}
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
   );
 }
 

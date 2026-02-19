@@ -3,12 +3,15 @@ import React, { useMemo, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
@@ -66,7 +69,7 @@ async function handleSave() {
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        Alert.alert("Saved 💜", "Your gratitude has been saved.", [
+        Alert.alert("Saved ✅", "Your gratitude has been saved.", [
         { text: "OK", onPress: () => router.back() },
         ]);
 
@@ -80,12 +83,19 @@ async function handleSave() {
     }
 
 
-  return (
-    <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.root}>
+            <ScrollView
+              contentContainerStyle={styles.container}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -197,6 +207,8 @@ async function handleSave() {
 
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
   );
 }
 

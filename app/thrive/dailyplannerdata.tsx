@@ -76,7 +76,7 @@ export default function DailyPlannerEntryDataScreen() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved", "Your daily plan has been updated.");
+      Alert.alert("Saved ✅", "Your daily plan has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("Daily plan update error", e);

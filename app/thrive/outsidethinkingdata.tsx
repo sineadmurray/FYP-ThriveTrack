@@ -54,7 +54,7 @@ export default function OutsideThinkingDataScreen() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved", "Your Outside-In action has been updated.");
+      Alert.alert("Saved ✅", "Your Outside-In action has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("Outside-In update error", e);

@@ -81,7 +81,7 @@ export default function WhereIAmEntryDataScreen() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert("Saved", "Your reflection has been updated.");
+      Alert.alert("Saved ✅", "Your reflection has been updated.");
       setIsEditing(false);
     } catch (e) {
       console.log("WhereIAm update error", e);

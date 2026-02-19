@@ -138,10 +138,9 @@ export default function WeeklySummaryScreen() {
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backRow}>
-          <Text style={styles.backArrow}>‹</Text>
-          <Text style={styles.backText}>Back</Text>
-        </Pressable>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backArrow}>‹</Text>
+          </Pressable>
 
         {/* Title */}
         <View style={{ alignItems: "center", marginTop: 4 }}>
@@ -365,6 +364,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "800",
     color: PINK,
+  },
+  backBtn: {
+    paddingRight: 8,
+    paddingTop: 4,
   },
 
   iconTop: {
