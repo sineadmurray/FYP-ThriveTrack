@@ -32,12 +32,13 @@ export default function WeeklySummaryScreen() {
   //** code sourced from Chatgpt conversation **//
   //...//
   type WeeklyAISummary = {
-    overallMoodTrend: string[];
-    whatFeltPositive: string[];
-    whatFeltChallenging: string[];
-    gentleSuggestion: string[];
+    overallMoodTrend: string;
+    whatFeltPositive: string;
+    whatFeltChallenging: string;
+    gentleSuggestion: string;
     note: string;
   };
+  
 
   const [aiSummary, setAiSummary] = useState<WeeklyAISummary | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -251,16 +252,19 @@ export default function WeeklySummaryScreen() {
           <View style={styles.SuggestionCard}>
             <Text style={styles.SuggestionTitle}>Gentle Suggestion</Text>
 
-            {aiLoading && <Text style={styles.SuggestionText}>Generating your summary…</Text>}
-            {!aiLoading && aiError && <Text style={styles.SuggestionText}>{aiError}</Text>}
+            {aiLoading && (
+              <Text style={styles.SuggestionText}>Generating your summary…</Text>
+            )}
+
+            {!aiLoading && aiError && (
+              <Text style={styles.SuggestionText}>{aiError}</Text>
+            )}
+
             {!aiLoading && !aiError && aiSummary && (
               <>
-                {aiSummary.gentleSuggestion.map((t, i) => (
-                  <Text key={i} style={styles.SuggestionText}>
-                    {"• "}{t}
-                  </Text>
-                ))}
-                <Text style={[styles.disclaimerText, { marginTop: 6 }]}>
+                <Text style={styles.SuggestionText}>{aiSummary.gentleSuggestion}</Text>
+
+                <Text style={[styles.disclaimerText, { marginTop: 10 }]}>
                   {aiSummary.note}
                 </Text>
               </>
