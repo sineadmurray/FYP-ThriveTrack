@@ -22,7 +22,7 @@ export default function OutsideThinkingDataScreen() {
     id?: string;
     created_at?: string;
     action_text?: string;
-    prompt_id?: string; // optional, comes as string in params
+    prompt_id?: string; 
   }>();
 
   const { niceDate, niceTime } = useMemo(
@@ -212,7 +212,7 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Theme (matches your purple reflect screens like gratitude) */
+/* Theme */
 const BG = "#fff5f7";
 const CARD_BG = "#ffffff";
 const INNER_BG = "#f6edff";

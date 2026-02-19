@@ -24,6 +24,7 @@ export default function ThriveScreen() {
     {
       title: "Weekly Summary",
       desc: "Get a quick snapshot of your week – highs, lows, and progress.",
+      onPress: () => router.push("/thrive/weeklysummary"),
       
     },
     {

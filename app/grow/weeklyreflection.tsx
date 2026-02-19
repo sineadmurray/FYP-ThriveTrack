@@ -1,15 +1,15 @@
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
@@ -56,7 +56,7 @@ export default function WeeklyReflectionsReviewScreen() {
     try {
       setSaving(true);
 
-      // Change endpoint to match your API
+      // Change endpoint to match API
       const res = await fetch(`${API_BASE}/weekly_reflections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,7 +108,7 @@ export default function WeeklyReflectionsReviewScreen() {
             <Text style={styles.title}>Weekly Reflections &amp;</Text>
             <Text style={styles.title}>Review</Text>
             <Text style={styles.subtitle}>
-              Look back at your week — what helped, what can you{"\n"}tweak?
+              Look back at your week — what helped, what can you tweak?
             </Text>
           </View>
 
@@ -244,7 +244,7 @@ function SinglePromptCard({
   );
 }
 
-/* Mint theme to match screenshot */
+/* Mint theme */
 const BG = "#fbf6f8";
 const TEXT = "#222";
 const MINT = "#9fe7c0";

@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -18,7 +19,7 @@ import SideDrawer from "../components/SideDrawer";
 type MoodEntry = {
   id: string;
   user_id?: string;
-  mood: string; // "good" etc
+  mood: string;
   mood_value?: number | null; // 1-5
   notes?: string | null;
   created_at: string;
@@ -68,8 +69,7 @@ function niceCap(s: string) {
 }
 
 function weekdayKey(date: Date) {
-  // Mon, Tue...
-  return date.toLocaleDateString("en-IE", { weekday: "short" });
+  return date.toLocaleDateString("en-IE", { weekday: "short" }); // Mon, Tue...
 }
 
 export default function MoodInsightsScreen() {
@@ -80,6 +80,10 @@ export default function MoodInsightsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [entries, setEntries] = useState<MoodEntry[]>([]);
+
+  // Support prompt modal
+  const [showSupportPrompt, setShowSupportPrompt] = useState(false);
+  const supportShownOnceRef = useRef(false);
 
   // TEMP user id
   const userId = "demo-student-1";
@@ -112,7 +116,6 @@ export default function MoodInsightsScreen() {
   }, [entries, range]);
 
   const normalized = useMemo(() => {
-    // ensure mood_value always exists
     return filtered
       .map((e) => {
         const moodKey = (e.mood || "").toLowerCase().trim();
@@ -160,8 +163,7 @@ export default function MoodInsightsScreen() {
   // ---------- Trend Data (Line Chart) ----------
   const trend = useMemo(() => {
     const sorted = [...normalized].sort(
-      (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
     if (range === "week") {
@@ -171,21 +173,27 @@ export default function MoodInsightsScreen() {
 
       sorted.forEach((e) => {
         const d = weekdayKey(new Date(e.created_at));
-        if (!map[d]) map[d] = [];
-        map[d].push(e.mood_value || 0);
+        map[d]?.push(e.mood_value || 0);
       });
+
+      // Carry forward last known value so the line never drops to 0 / disappears
+      let lastKnown: number | null = null;
 
       return days.map((d) => {
         const vals = map[d];
+
         if (!vals || vals.length === 0) {
-          return { label: d, value: 0, hideDataPoint: true };
+          if (lastKnown != null) return { label: d, value: lastKnown, hideDataPoint: true };
+          return { label: d, value: 1, hideDataPoint: true }; // keep within 1–5
         }
+
         const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+        lastKnown = avg;
         return { label: d, value: avg };
       });
     }
 
-    // month/all: last 7 entries by date label (simple)
+    // month/all: last 7 entries
     const last = sorted.slice(-7);
     return last.map((e) => {
       const d = new Date(e.created_at);
@@ -204,6 +212,38 @@ export default function MoodInsightsScreen() {
       hideDataPoint: p.hideDataPoint ?? false,
     }));
   }, [trend]);
+
+  // ---------- Mood-triggered support prompt (rule-based) ----------
+  const supportPrompt = useMemo(() => {
+    const recent = [...normalized]
+      .sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      .slice(0, 5);
+
+    if (recent.length < 5) return null;
+
+    const avg =
+      recent.reduce((acc, e) => acc + (e.mood_value || 0), 0) / recent.length;
+
+    if (avg < 2) {
+      return {
+        avg: avg.toFixed(1),
+        message:
+          "It looks like your last few check-ins have been on the tougher side. If you’d like, you can explore some gentle support resources.",
+      };
+    }
+    return null;
+  }, [normalized]);
+
+  // Show modal once (per screen visit) if the rule triggers
+  useEffect(() => {
+    if (!supportPrompt) return;
+    if (supportShownOnceRef.current) return;
+
+    supportShownOnceRef.current = true;
+    setShowSupportPrompt(true);
+  }, [supportPrompt]);
 
   // ---------- Breakdown Data (Donut) ----------
   const pieData = useMemo(() => {
@@ -250,123 +290,47 @@ export default function MoodInsightsScreen() {
   }, [moodCounts, totalEntries]);
 
   // ---------- Insights (rule-based) ----------
-const insights = useMemo(() => {
-  const out: string[] = [];
-  if (totalEntries === 0) return out;
+  const insights = useMemo(() => {
+    const out: string[] = [];
+    if (totalEntries === 0) return out;
 
-  // Helpers
-  const avg = Number(averageMood); // averageMood is a string like "4.3"
-  const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+    const avg = Number(averageMood);
 
-  // 1) Average mood level (overall)
-  if (avg >= 4.2) {
-    out.push("🌟 Overall, your mood has been very positive in this period.");
-  } else if (avg >= 3.5) {
-    out.push("😊 Overall, your mood has been mostly positive in this period.");
-  } else if (avg >= 2.6) {
-    out.push("🧡 Overall, your mood has been mixed — some good days, some tougher days.");
-  } else {
-    out.push("🫶 Overall, this period looks tough. Be kind to yourself and take small steps.");
-  }
+    if (avg >= 4.2) out.push("🌟 Overall, your mood has been very positive in this period.");
+    else if (avg >= 3.5) out.push("😊 Overall, your mood has been mostly positive in this period.");
+    else if (avg >= 2.6) out.push("🧡 Overall, your mood has been mixed — some good days, some tougher days.");
+    else out.push("🫶 Overall, this period looks tough. Be kind to yourself and take small steps.");
 
-  // Build a clean series of points for trend/volatility
-  const series = lineData
-    .map((p) => (typeof p.value === "number" ? p.value : 0))
-    .filter((v) => v > 0); // ignore missing days/zeros
+    const series = lineData
+      .map((p: any) => (typeof p.value === "number" ? p.value : 0))
+      .filter((v: number) => v > 0);
 
-  // 2) Trend direction (up/down/flat)
-  if (series.length >= 2) {
-    const first = series[0];
-    const last = series[series.length - 1];
-    const diff = last - first;
-
-    if (diff >= 0.35) {
-      out.push("📈 Your mood is trending upward across this period.");
-    } else if (diff <= -0.35) {
-      out.push("📉 Your mood is trending downward across this period.");
-    } else {
-      out.push("➡️ Your mood has stayed fairly steady across this period.");
+    if (series.length >= 2) {
+      const diff = series[series.length - 1] - series[0];
+      if (diff >= 0.35) out.push("📈 Your mood is trending upward across this period.");
+      else if (diff <= -0.35) out.push("📉 Your mood is trending downward across this period.");
+      else out.push("➡️ Your mood has stayed fairly steady across this period.");
     }
-  }
 
-  // 3) Mood distribution: positive vs difficult ratio
-  const positiveCount = (moodCounts.good ?? 0) + (moodCounts.amazing ?? 0);
-  const difficultCount = (moodCounts.low ?? 0) + (moodCounts.struggling ?? 0);
-  const posRatio = positiveCount / totalEntries;
-  const diffRatio = difficultCount / totalEntries;
+    const positiveCount = (moodCounts.good ?? 0) + (moodCounts.amazing ?? 0);
+    const difficultCount = (moodCounts.low ?? 0) + (moodCounts.struggling ?? 0);
+    const posRatio = positiveCount / totalEntries;
+    const diffRatio = difficultCount / totalEntries;
 
-  if (posRatio >= 0.6) {
-    out.push("😊 You’ve had more positive days (Good/Amazing) than difficult ones.");
-  } else if (diffRatio >= 0.5) {
-    out.push("🫶 A lot of days have been difficult (Low/Struggling). Consider extra self-care support.");
-  } else {
-    out.push("⚖️ Your days are balanced between positive and difficult moods.");
-  }
+    if (posRatio >= 0.6) out.push("😊 You’ve had more positive days (Good/Amazing) than difficult ones.");
+    else if (diffRatio >= 0.5) out.push("🫶 A lot of days have been difficult (Low/Struggling). Consider extra self-care support.");
+    else out.push("⚖️ Your days are balanced between positive and difficult moods.");
 
-  // 4) Most common mood (already calculated)
-  if (mostCommonMood !== "—") {
-    out.push(`🏷️ Your most common mood in this period was **${mostCommonMood}**.`);
-  }
+    if (mostCommonMood !== "—") out.push(`🏷️ Your most common mood in this period was **${mostCommonMood}**.`);
 
-  // 5) Consistency: how many distinct days did you log?
-  const uniqueDays = new Set(
-    normalized.map((e) => new Date(e.created_at).toDateString())
-  ).size;
-
-  if (range === "week") {
-    if (uniqueDays >= 5) out.push("📅 Great consistency — you checked in on most days this week.");
-    else if (uniqueDays >= 3) out.push("📅 Nice work — a few more check-ins would make trends clearer.");
-    else out.push("📌 Add a few more check-ins to unlock clearer insights for the week.");
-  } else {
-    if (uniqueDays >= 12) out.push("📅 Strong consistency — regular check-ins make patterns easier to spot.");
-    else if (uniqueDays >= 6) out.push("📅 Good effort — more regular check-ins will improve accuracy of trends.");
-    else out.push("📌 Try checking in a bit more often to see clearer patterns over time.");
-  }
-
-  // 6) Weekday vs weekend pattern (consistency style)
-  const weekdayCount = normalized.filter((e) => {
-    const day = new Date(e.created_at).getDay(); // 0 Sun..6 Sat
-    return day >= 1 && day <= 5;
-  }).length;
-  const weekendCount = totalEntries - weekdayCount;
-
-  if (weekdayCount >= weekendCount + 2) {
-    out.push("⭐ You log moods more on weekdays — routines seem to help your tracking.");
-  } else if (weekendCount >= weekdayCount + 2) {
-    out.push("🌿 You log moods more on weekends — that might be your best reflection time.");
-  } else {
-    out.push("🗓️ Your logging is fairly even across weekdays and weekends.");
-  }
-
-  // 7) Volatility (big swings day-to-day)
-  if (series.length >= 3) {
-    const deltas: number[] = [];
-    for (let i = 1; i < series.length; i++) {
-      deltas.push(Math.abs(series[i] - series[i - 1]));
-    }
-    const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
-
-    if (avgDelta >= 1.1) {
-      out.push("🎢 Your mood has been changing a lot day-to-day (high variability).");
-    } else if (avgDelta >= 0.6) {
-      out.push("🔄 Your mood has had some ups and downs, which is completely normal.");
-    } else {
-      out.push("🌿 Your mood has been fairly steady (low variability).");
-    }
-  }
-
-  // Optional: limit to 3–4 lines so the UI stays tidy
-  return out.slice(0, 4);
-}, [averageMood, lineData, moodCounts, mostCommonMood, normalized, range, totalEntries]);
+    return out.slice(0, 4);
+  }, [averageMood, lineData, moodCounts, mostCommonMood, totalEntries]);
 
   const screenWidth = Dimensions.get("window").width;
 
   return (
     <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -386,60 +350,27 @@ const insights = useMemo(() => {
         {/* Back */}
         <Pressable onPress={() => router.back()} style={styles.backRow}>
           <Text style={styles.backArrow}>‹</Text>
-          <Text style={styles.backText}>Back to Thrive</Text>
         </Pressable>
 
         {/* Title */}
         <View style={{ alignItems: "center", marginTop: 4 }}>
           <Text style={styles.iconTop}>📊</Text>
           <Text style={styles.title}>Mood Insights</Text>
-          <Text style={styles.subtitle}>
-            Discover patterns in your wellbeing journey
-          </Text>
+          <Text style={styles.subtitle}>Discover patterns in your wellbeing journey</Text>
         </View>
 
         {/* Range Pills */}
         <View style={styles.pillsRow}>
-          <Pressable
-            onPress={() => setRange("week")}
-            style={[styles.pill, range === "week" && styles.pillActive]}
-          >
-            <Text
-              style={[
-                styles.pillText,
-                range === "week" && styles.pillTextActive,
-              ]}
-            >
-              This Week
-            </Text>
+          <Pressable onPress={() => setRange("week")} style={[styles.pill, range === "week" && styles.pillActive]}>
+            <Text style={[styles.pillText, range === "week" && styles.pillTextActive]}>This Week</Text>
           </Pressable>
 
-          <Pressable
-            onPress={() => setRange("month")}
-            style={[styles.pill, range === "month" && styles.pillActive]}
-          >
-            <Text
-              style={[
-                styles.pillText,
-                range === "month" && styles.pillTextActive,
-              ]}
-            >
-              This Month
-            </Text>
+          <Pressable onPress={() => setRange("month")} style={[styles.pill, range === "month" && styles.pillActive]}>
+            <Text style={[styles.pillText, range === "month" && styles.pillTextActive]}>This Month</Text>
           </Pressable>
 
-          <Pressable
-            onPress={() => setRange("all")}
-            style={[styles.pill, range === "all" && styles.pillActive]}
-          >
-            <Text
-              style={[
-                styles.pillText,
-                range === "all" && styles.pillTextActive,
-              ]}
-            >
-              All Time
-            </Text>
+          <Pressable onPress={() => setRange("all")} style={[styles.pill, range === "all" && styles.pillActive]}>
+            <Text style={[styles.pillText, range === "all" && styles.pillTextActive]}>All Time</Text>
           </Pressable>
         </View>
 
@@ -447,9 +378,7 @@ const insights = useMemo(() => {
         {loading && (
           <View style={{ marginTop: 20, alignItems: "center" }}>
             <ActivityIndicator />
-            <Text style={{ marginTop: 8, color: "#666" }}>
-              Loading mood data...
-            </Text>
+            <Text style={{ marginTop: 8, color: "#666" }}>Loading mood data...</Text>
           </View>
         )}
 
@@ -465,7 +394,10 @@ const insights = useMemo(() => {
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
                 <Text style={styles.statIcon}>📈</Text>
-                <Text style={styles.statValue}>{averageMood}</Text>
+                <View style={{ alignItems: "center" }}>
+                  <Text style={styles.statValue}>{averageMood}</Text>
+                  <Text style={styles.statSubValue}>(out of 5)</Text>
+                </View>
                 <Text style={styles.statLabel}>Average{"\n"}Mood</Text>
               </View>
 
@@ -477,7 +409,14 @@ const insights = useMemo(() => {
 
               <View style={styles.statCard}>
                 <Text style={styles.statIcon}>😊</Text>
-                <Text style={styles.statValue}>{mostCommonMood}</Text>
+                <Text
+                  style={styles.statValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.6}
+                >
+                  {mostCommonMood}
+                </Text>
                 <Text style={styles.statLabel}>Most{"\n"}Common</Text>
               </View>
             </View>
@@ -495,24 +434,29 @@ const insights = useMemo(() => {
                   data={lineData}
                   height={220}
                   width={screenWidth - 40}
-                  initialSpacing={14}
+                  yAxisLabelWidth={36}
+                  initialSpacing={24}
                   spacing={range === "week" ? 32 : 38}
                   thickness={3}
-                  curved
+                  curved={false}
                   hideRules={false}
                   rulesType="dashed"
                   yAxisTextStyle={{ color: "#777" }}
                   xAxisLabelTextStyle={{ color: "#777" }}
+
+                  // Keep scale meaningful for your app (1–5)
+                  yAxisOffset={1}
+                  stepValue={1}
+                  noOfSections={4}
                   maxValue={5}
-                  noOfSections={5}
-                  yAxisLabelTexts={["1", "2", "3", "4", "5"]}
+
+                  // Bigger dots so logged moods stand out
+                  dataPointsRadius={7}
+                  dataPointsColor={PINK}
+
                   yAxisColor="#ddd"
                   xAxisColor="#ddd"
-                  dataPointsColor={PINK}
                   color={PINK}
-                  startFillColor={PINK}
-                  endFillColor={PINK}
-                  hideDataPoints={false}
                 />
               )}
 
@@ -548,12 +492,7 @@ const insights = useMemo(() => {
                     {breakdownRows.map((r) => (
                       <View key={r.key} style={styles.breakRow}>
                         <View style={styles.breakLeft}>
-                          <View
-                            style={[
-                              styles.dot,
-                              { backgroundColor: r.color },
-                            ]}
-                          />
+                          <View style={[styles.dot, { backgroundColor: r.color }]} />
                           <Text style={styles.breakLabel}>{r.label}</Text>
                         </View>
                         <Text style={styles.breakRight}>
@@ -582,6 +521,45 @@ const insights = useMemo(() => {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+
+      {/* Support Prompt Modal */}
+      <Modal
+        visible={showSupportPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSupportPrompt(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>💛 A gentle check-in</Text>
+
+            <Text style={styles.modalText}>
+              {supportPrompt?.message}
+            </Text>
+
+            <Pressable
+              style={styles.modalPrimaryBtn}
+              onPress={() => {
+                setShowSupportPrompt(false);
+                router.push("/thrive/resources"); 
+              }}
+            >
+              <Text style={styles.modalPrimaryBtnText}>View Support Resources</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.modalSecondaryBtn}
+              onPress={() => setShowSupportPrompt(false)}
+            >
+              <Text style={styles.modalSecondaryBtnText}>Not right now</Text>
+            </Pressable>
+
+            <Text style={styles.modalFootnote}>
+              Based on your last 5 mood check-ins (avg {supportPrompt?.avg}/5).
+            </Text>
+          </View>
+        </View>
+      </Modal>
 
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
@@ -647,11 +625,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: PINK,
     marginTop: -2,
-  },
-  backText: {
-    color: PINK,
-    fontSize: 18,
-    fontWeight: "600",
   },
 
   iconTop: {
@@ -725,6 +698,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "900",
     color: PINK,
+  },
+  statSubValue: {
+    marginTop: 2,
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#777",
   },
   statLabel: {
     marginTop: 6,
@@ -808,5 +787,75 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 10,
     fontWeight: "600",
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 380,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: "#ffd0e2",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: PINK,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#333",
+    lineHeight: 22,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  modalPrimaryBtn: {
+    marginTop: 14,
+    backgroundColor: PINK,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  modalPrimaryBtnText: {
+    color: "#fff",
+    fontWeight: "900",
+    fontSize: 16,
+  },
+  modalSecondaryBtn: {
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 16,
+    alignItems: "center",
+    backgroundColor: "#ffe0ec",
+    borderWidth: 1,
+    borderColor: "#ffd0e2",
+  },
+  modalSecondaryBtnText: {
+    color: "#b56b87",
+    fontWeight: "900",
+    fontSize: 15,
+  },
+  modalFootnote: {
+    marginTop: 10,
+    fontSize: 12,
+    color: "#777",
+    textAlign: "center",
+    fontWeight: "700",
   },
 });

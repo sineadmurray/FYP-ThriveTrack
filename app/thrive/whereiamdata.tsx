@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import SideDrawer from "../components/SideDrawer";
@@ -304,7 +304,7 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Mint theme (matches your WhereIAm screen) */
+/* Mint theme */
 const BG = "#fbf6f8";
 const TEXT = "#222";
 const MINT = "#9fe7c0";

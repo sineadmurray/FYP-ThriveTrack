@@ -40,7 +40,7 @@ export default function GrowScreen() {
     <View style={styles.root}>
       {/* Main content */}
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* ----- Header (identical to Home) ----- */}
+        {/* ----- Header ----- */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}

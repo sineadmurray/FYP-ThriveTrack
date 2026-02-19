@@ -1,31 +1,29 @@
-// app/thrive/resources.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    Linking,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Image,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import SideDrawer from "../components/SideDrawer";
 
-// --------------------
-// Types
-// --------------------
+/* -------------------- */
+/* Types */
+/* -------------------- */
+
 type ResourceItem = {
   title: string;
   desc: string;
-  // Leave blank for now, fill later
   url?: string;
   phone?: string;
-  sms?: { number: string; body?: string };
-  type: "link" | "phone" | "sms";
+  type: "link" | "phone";
   icon: React.ComponentProps<typeof Ionicons>["name"];
 };
 
@@ -35,29 +33,30 @@ type ResourceSection = {
   items: ResourceItem[];
 };
 
-// --------------------
-// Data (EDIT LATER)
-// --------------------
+/* -------------------- */
+/* Data */
+/* -------------------- */
+
 const QUICK_SUPPORT: ResourceItem[] = [
   {
-    title: "Crisis Helpline",
+    title: "Samaritans Crisis Helpline",
     desc: "24/7 confidential support",
     type: "phone",
-    phone: "", // <- add later
+    phone: "116123",
     icon: "call-outline",
   },
   {
-    title: "Text Support",
-    desc: 'Text "HELLO" to ...',
-    type: "sms",
-    sms: { number: "", body: "" }, // <- add later
+    title: "Text About It (50808)",
+    desc: "Free, anonymous, 24/7 messaging service",
+    type: "link",
+    url: "https://www.textaboutit.ie/",
     icon: "chatbubble-ellipses-outline",
   },
   {
     title: "Emergency Services",
     desc: "Immediate emergency help",
     type: "phone",
-    phone: "", // <- add later
+    phone: "999",
     icon: "alert-circle-outline",
   },
 ];
@@ -65,34 +64,27 @@ const QUICK_SUPPORT: ResourceItem[] = [
 const RESOURCE_SECTIONS: ResourceSection[] = [
   {
     heading: "Mental Health Support",
-    icon: "brain-outline",
+    icon: "medkit-outline",
     items: [
       {
-        title: "Student Counselling Services",
-        desc: "Free, confidential counselling for students",
+        title: "Find Your College Student Counselling Service",
+        desc: "Search for your university or college's official counselling page.",
         type: "link",
-        url: "", // <- add later
-        icon: "heart-outline",
+        url: "https://www.google.com/search?q=college+student+counselling+service+ireland",
+        icon: "school-outline",
       },
       {
         title: "Therapy & Professional Support",
-        desc: "Connect with licensed therapists",
+        desc: "Information on therapy types and professional support options.",
         type: "link",
-        url: "", // <- add later
+        url: "https://fettle.ie/types-of-therapy/",
         icon: "pulse-outline",
       },
       {
-        title: "Crisis Text Line",
-        desc: "Free 24/7 text support",
-        type: "link",
-        url: "", // <- add later
-        icon: "shield-checkmark-outline",
-      },
-      {
         title: "CBT & Coping Tools",
-        desc: "Evidence-based self-help resources",
+        desc: "Self-help techniques you can try.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.nhs.uk/every-mind-matters/mental-wellbeing-tips/self-help-cbt-techniques/",
         icon: "book-outline",
       },
     ],
@@ -103,23 +95,23 @@ const RESOURCE_SECTIONS: ResourceSection[] = [
     items: [
       {
         title: "Exam Stress Support",
-        desc: "Managing pressure and anxiety around exams",
+        desc: "Managing pressure and anxiety around exams.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www2.hse.ie/mental-health/life-situations-events/exam-stress/",
         icon: "time-outline",
       },
       {
         title: "Study Skills & Overwhelm",
-        desc: "Tips for managing your workload",
+        desc: "Tips for managing your workload.",
         type: "link",
-        url: "", // <- add later
+        url: "https://libguides.ucd.ie/StudySkills/time",
         icon: "bulb-outline",
       },
       {
         title: "Time Management Help",
-        desc: "Balance academics and wellbeing",
+        desc: "Balance academics and wellbeing.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.universityofgalway.ie/counsellors/resources/self-help/time-management/",
         icon: "timer-outline",
       },
     ],
@@ -130,30 +122,30 @@ const RESOURCE_SECTIONS: ResourceSection[] = [
     items: [
       {
         title: "Sleep & Rest Tips",
-        desc: "Improve your sleep quality",
+        desc: "Improve your sleep quality.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www2.hse.ie/mental-health/issues/sleep-problems/",
         icon: "moon-outline",
       },
       {
         title: "Mindfulness & Grounding",
-        desc: "Simple exercises to calm your mind",
+        desc: "Simple exercises to calm your mind.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.healthline.com/health/grounding-techniques",
         icon: "leaf-outline",
       },
       {
         title: "Burnout Prevention",
-        desc: "Recognize and prevent overwhelm",
+        desc: "Recognize and prevent overwhelm.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.psychiatry.org/news-room/apa-blogs/preventing-burnout-protecting-your-well-being",
         icon: "heart-outline",
       },
       {
         title: "Healthy Habits Guide",
-        desc: "Small steps to better wellbeing",
+        desc: "Small steps to better wellbeing.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/five-steps-to-mental-wellbeing/",
         icon: "cafe-outline",
       },
     ],
@@ -164,87 +156,70 @@ const RESOURCE_SECTIONS: ResourceSection[] = [
     items: [
       {
         title: "Financial Stress Support",
-        desc: "Help managing money worries",
+        desc: "Help managing money worries.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www2.hse.ie/mental-health/life-situations-events/money-worries/",
         icon: "wallet-outline",
       },
       {
         title: "Budgeting Help",
-        desc: "Student budgeting tips and tools",
+        desc: "Student budgeting tips and tools.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.anpost.com/Money/Managing-Finances/Blog/How-To-Budget-Money-As-a-College-Student",
         icon: "book-outline",
       },
       {
-        title: "Student Assistance Services",
-        desc: "Emergency funds and practical support",
+        title: "Find Your College Student Assistance Fund",
+        desc: "Search your college’s official Student Assistance Fund page.",
         type: "link",
-        url: "", // <- add later
+        url: "https://www.google.com/search?q=student+assistance+fund+ireland+college",
         icon: "shield-outline",
       },
     ],
   },
 ];
 
-// --------------------
-// Safe open handler (works even with blank links)
-// --------------------
+/* -------------------- */
+/* Safe open handler */
+/* -------------------- */
+
 async function openResource(item: ResourceItem) {
   if (item.type === "link") {
-    const url = (item.url ?? "").trim();
-    if (!url) {
-      Alert.alert("Link not added yet", "You can add this URL later in the resources list.");
+    if (!item.url) {
+      Alert.alert("Link not available");
       return;
     }
-    const ok = await Linking.canOpenURL(url);
+    const ok = await Linking.canOpenURL(item.url);
     if (!ok) {
-      Alert.alert("Cannot open link", "This URL doesn't look valid.");
+      Alert.alert("Cannot open link");
       return;
     }
-    Linking.openURL(url);
+    await Linking.openURL(item.url);
     return;
   }
 
   if (item.type === "phone") {
-    const phone = (item.phone ?? "").trim();
-    if (!phone) {
-      Alert.alert("Number not added yet", "You can add this phone number later.");
+    if (!item.phone) {
+      Alert.alert("Phone number not available");
       return;
     }
-    const tel = `tel:${phone}`;
+
+    const tel = `tel:${item.phone.replace(/\s+/g, "")}`;
     const ok = await Linking.canOpenURL(tel);
+
     if (!ok) {
-      Alert.alert("Calling not supported", "This device can't place calls.");
+      Alert.alert("Calling not supported on this device");
       return;
     }
-    Linking.openURL(tel);
-    return;
-  }
 
-  // sms
-  const number = (item.sms?.number ?? "").trim();
-  if (!number) {
-    Alert.alert("Text number not added yet", "You can add this SMS number later.");
-    return;
+    await Linking.openURL(tel);
   }
-  const body = item.sms?.body ? encodeURIComponent(item.sms.body) : "";
-  const smsUrl =
-    Platform.OS === "ios"
-      ? `sms:${number}${body ? `&body=${body}` : ""}`
-      : `sms:${number}${body ? `?body=${body}` : ""}`;
-
-  const ok = await Linking.canOpenURL(smsUrl);
-  if (!ok) {
-    Alert.alert("SMS not supported", "This device can't send SMS messages.");
-    return;
-  }
-  Linking.openURL(smsUrl);
 }
 
-// --------------------
-// Screen
-// --------------------
+/* -------------------- */
+/* Screen */
+/* -------------------- */
+
 export default function ResourcesScreen() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
@@ -252,16 +227,15 @@ export default function ResourcesScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* ----- Header (MATCHES THRIVE INDEX) ----- */}
+        {/* Header */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={styles.appTitle}>Reflect, Grow & Thrive</Text>
 
-          {/* Hamburger */}
           <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
             <View style={styles.menuLine} />
             <View style={[styles.menuLine, { width: 18 }]} />
@@ -269,29 +243,28 @@ export default function ResourcesScreen() {
           </Pressable>
         </View>
 
-        {/* ----- Back to Thrive ----- */}
+        {/* Back */}
         <Pressable onPress={() => router.back()} style={styles.backRow}>
           <Text style={styles.backArrow}>‹</Text>
           <Text style={styles.backText}>Back to Thrive</Text>
         </Pressable>
 
-        {/* ----- Hero ----- */}
+        {/* Hero */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
           <View style={styles.iconBadge}>
             <Text style={{ fontSize: 22 }}>🤝</Text>
           </View>
-          <Text style={styles.title}>Support &amp; Resources</Text>
+          <Text style={styles.title}>Support & Resources</Text>
           <Text style={styles.subtitle}>
             Helpful links and supports for when you need a{"\n"}little extra help.
           </Text>
         </View>
 
-        {/* ----- Quick Support Panel ----- */}
+        {/* Quick Support */}
         <View style={styles.quickPanel}>
           <Text style={styles.quickTitle}>Need support right now?</Text>
           <Text style={styles.quickDesc}>
-            If you're in crisis or need immediate help, these services are here for you 24/7. It's okay
-            to reach out.
+            If you're in crisis or need immediate help, these services are here 24/7.
           </Text>
 
           <View style={{ marginTop: 8 }}>
@@ -306,7 +279,7 @@ export default function ResourcesScreen() {
           </View>
         </View>
 
-        {/* ----- Sections ----- */}
+        {/* Sections */}
         {RESOURCE_SECTIONS.map((section) => (
           <View key={section.heading} style={{ marginTop: 12 }}>
             <View style={styles.sectionHeader}>
@@ -320,10 +293,10 @@ export default function ResourcesScreen() {
           </View>
         ))}
 
-        {/* ----- Footer reassurance ----- */}
+        {/* Footer */}
         <View style={styles.footerCard}>
           <Text style={{ fontSize: 24, marginBottom: 10 }}>💛</Text>
-          <Text style={styles.footerText}>You're not alone. Support is always{"\n"}available.</Text>
+          <Text style={styles.footerText}>You're not alone. Support is always available.</Text>
         </View>
       </ScrollView>
 
@@ -332,9 +305,7 @@ export default function ResourcesScreen() {
   );
 }
 
-// --------------------
-// Reusable Card Component
-// --------------------
+
 function ResourceCard({
   item,
   onPress,
@@ -369,7 +340,7 @@ function ResourceCard({
   );
 }
 
-/* Theme – pink tones for Thrive (COPIED FROM YOUR INDEX) */
+/* Theme – pink tones for Thrive */
 const BG = "#fff5f9";
 const CARD_BG = "#ffffff";
 const PINK = "#f06292";

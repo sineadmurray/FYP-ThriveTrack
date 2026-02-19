@@ -37,7 +37,7 @@ export default function LongTermVisionScreen() {
     try {
       setSaving(true);
 
-      // Change endpoint to match your API
+      // Change endpoint to match API
       const res = await fetch(`${API_BASE}/long_term_visions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,7 +194,7 @@ function SmartRow({
   );
 }
 
-/* Mint theme to match screenshot */
+/* Mint theme */
 const BG = "#fbf6f8";
 const TEXT = "#222";
 const MINT = "#9fe7c0";

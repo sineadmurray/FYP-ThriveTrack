@@ -61,7 +61,7 @@ export default function SideDrawer({ visible, onClose }: Props) {
           <MenuButton label="🪞  Reflect" onPress={() => go("/reflect")} />
           <MenuButton label="🌱  Grow"    onPress={() => go("/grow")} />
           <MenuButton label="🌸  Thrive"  onPress={() => go("/thrive")} />
-          <MenuButton label="⚙️  Profile / Settings" onPress={() => go("/")} />
+          <MenuButton label="⚙️  Settings" onPress={() => go("/settings")} />
         </View>
       </Animated.View>
     </View>

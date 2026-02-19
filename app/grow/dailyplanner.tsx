@@ -50,7 +50,7 @@ export default function DailyPlannerScreen() {
     try {
       setSaving(true);
 
-      // Change endpoint to match your API
+      // Change endpoint to match API
       const res = await fetch(`${API_BASE}/daily_plans`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

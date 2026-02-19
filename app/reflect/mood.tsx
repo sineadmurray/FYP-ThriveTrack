@@ -53,7 +53,7 @@ export default function MoodJournalScreen() {
       const payload = {
         user_id: "demo-student-1",
         mood: selectedMood, // string
-        mood_value: selected.value, // ✅ REQUIRED by backend
+        mood_value: selected.value, 
         notes: trimmed || undefined,
       };
 
@@ -97,11 +97,19 @@ export default function MoodJournalScreen() {
           </Pressable>
         </View>
 
-        {/* Small debug banner */}
-        <Text style={styles.debug}>API: {API_BASE}</Text>
+        {/* Back + Title */}
+        <View style={styles.titleRow}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backArrow}>‹</Text>
+          </Pressable>
 
-        {/* Page title */}
-        <Text style={styles.pageTitle}>Mood Journal</Text>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text style={styles.title}>Mood Journal</Text>
+          </View>
+
+          <View style={{ width: 24 }} />
+        </View>
+
 
         {/* Card: Mood picker */}
         <View style={styles.card}>
@@ -231,7 +239,32 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: TEXT,
   },
-
+    titleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  backBtn: {
+    paddingRight: 8,
+    paddingTop: 4,
+  },
+  backArrow: {
+    fontSize: 26,
+    color: TEXT,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: PURPLE,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#6f6f6f",
+    textAlign: "center",
+    marginTop: 6,
+  },
   debug: {
     marginTop: 4,
     marginBottom: 2,

@@ -200,7 +200,7 @@ async function handleSave() {
   );
 }
 
-/* Theme (matches your purple reflect screens) */
+/* Theme */
 const BG = "#fff5f7";
 const CARD_BG = "#ffffff";
 const INNER_BG = "#f6edff";

@@ -114,7 +114,7 @@ export default function WhereIAmNowScreen() {
             <Text style={styles.title}>Where I Am Now /</Text>
             <Text style={styles.title}>Where I Want to Be</Text>
             <Text style={styles.subtitle}>
-              Reflect on where you are today and where you'd like{"\n"}to grow.
+              Reflect on where you are today and where you'd like to grow.
             </Text>
           </View>
 
@@ -228,7 +228,7 @@ function DualPromptSection({
   );
 }
 
-/* Mint theme to match screenshot */
+/* Mint theme */
 const BG = "#fbf6f8";
 const TEXT = "#222";
 const MINT = "#9fe7c0";

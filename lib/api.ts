@@ -1,18 +1,9 @@
 /* ---------------- Base URLs ---------------- */
 
-// Your LAN API (works if phone & laptop are on the same Wi-Fi)
-const LAN = "http://192.168.1.23:4000";
-
-const TUNNEL: string | null = "https://starla-nonreturn-jody.ngrok-free.dev";
-
-/* Pick which base URL to use */
-export const API_BASE: string = TUNNEL && TUNNEL.length > 0 ? TUNNEL : LAN;
+export const API_BASE = "https://fyp-thrivetrack.onrender.com";
 
 console.log("API_BASE =", API_BASE);
 
-// (Optional) simulator URLs (kept for reference; not used here)
-const IOS_SIM = "http://localhost:4000";
-const ANDROID_EMU = "http://10.0.2.2:4000";
 
 /* ---------------- Helpers ---------------- */
 
