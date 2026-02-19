@@ -1313,10 +1313,10 @@ app.post("/weekly_summary_ai", async (req, res) => {
       type: "object",
       additionalProperties: false,
       properties: {
-        overallMoodTrend: { type: "array", items: { type: "string" } },
-        whatFeltPositive: { type: "array", items: { type: "string" } },
-        whatFeltChallenging: { type: "array", items: { type: "string" } },
-        gentleSuggestion: { type: "array", items: { type: "string" } },
+        overallMoodTrend: { type: "string" },
+        whatFeltPositive: { type: "string" },
+        whatFeltChallenging: { type: "string" },
+        gentleSuggestion: { type: "string" },
         note: { type: "string" }
       },
       required: [
@@ -1330,16 +1330,26 @@ app.post("/weekly_summary_ai", async (req, res) => {
 
     // 3) Call OpenAI (Responses API) to generate the weekly summary
     const instructions = `
-You are a supportive wellbeing writing assistant for university students.
+    You are a supportive wellbeing reflection assistant for university students.
 
-Write in a warm, encouraging, non-clinical tone.
-
-Rules:
-- Do not diagnose or mention mental health disorders.
-- Do not give medical advice.
-- Keep bullets short and practical (max ~18 words each).
-- If the text indicates self-harm intent, respond with a brief safety message encouraging contacting local emergency services or a trusted person.
-`;
+    Write in a warm, encouraging, emotionally intelligent tone.
+    
+    You are NOT listing entries.
+    You are identifying patterns and trends across the week.
+    
+    Guidelines:
+    - Interpret emotional trends (improving, fluctuating, steady, mixed).
+    - Highlight meaningful patterns.
+    - Acknowledge effort and resilience.
+    - Normalise challenges without minimising them.
+    - Avoid clinical language or diagnoses.
+    - Write 3–5 sentences per section.
+    - Do NOT repeat raw entry wording.
+    - Do NOT list data.
+    - Create reflective narrative summaries.
+    
+    If self-harm intent appears, gently encourage seeking support.
+    `;
 
     const ai = await openai.responses.create({
       model: "gpt-4o-mini",
