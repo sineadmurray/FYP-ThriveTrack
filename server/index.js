@@ -1349,7 +1349,7 @@ Rules:
           role: "user",
           content: [
             {
-              type: "text",
+              type: "input_text",
               text:
                 "Create a weekly wellbeing summary from the following last-7-days data (JSON):\n\n" +
                 JSON.stringify(weeklyData)
