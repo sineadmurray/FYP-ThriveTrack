@@ -1360,9 +1360,10 @@ Rules:
       text: {
         format: {
           type: "json_schema",
+          name: "weekly_summary",   
+          schema,                  
           strict: true,
-          schema
-        }
+        },
       },
       max_output_tokens: 350
     });
