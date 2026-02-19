@@ -18,21 +18,6 @@ type WeeklySummaryCounts = {
   reflectCount: number;
   growCount: number;
 };
-//** code sourced from Chatgpt conversation **//
-//...//
-type WeeklyAISummary = {
-  overallMoodTrend: string[];
-  whatFeltPositive: string[];
-  whatFeltChallenging: string[];
-  gentleSuggestion: string[];
-  note: string;
-};
-
-const [aiSummary, setAiSummary] = useState<WeeklyAISummary | null>(null);
-const [aiLoading, setAiLoading] = useState(false);
-const [aiError, setAiError] = useState<string | null>(null);
-//...//
-//** code sourced from Chatgpt conversation **//
 
 export default function WeeklySummaryScreen() {
   const router = useRouter();
@@ -43,6 +28,23 @@ export default function WeeklySummaryScreen() {
   const [data, setData] = useState<WeeklySummaryCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  //** code sourced from Chatgpt conversation **//
+  //...//
+  type WeeklyAISummary = {
+    overallMoodTrend: string[];
+    whatFeltPositive: string[];
+    whatFeltChallenging: string[];
+    gentleSuggestion: string[];
+    note: string;
+  };
+
+  const [aiSummary, setAiSummary] = useState<WeeklyAISummary | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  //...//
+  //** code sourced from Chatgpt conversation **//
 
   const fetchWeeklyCounts = async () => {
     try {
