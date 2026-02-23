@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 // Types from the backend
@@ -146,49 +146,49 @@ export default function AccessAllDataScreen() {
         setError(null);
 
         // Fetch mood entries
-        const moodRes = await fetch(`${API_BASE}/mood_entries`);
+        const moodRes = await authedFetch("/mood_entries");
         if (!moodRes.ok) throw new Error(`mood HTTP ${moodRes.status}`);
         const moodData: MoodEntry[] = await moodRes.json();
 
         // Fetch end-of-day reflections
-        const eodRes = await fetch(`${API_BASE}/end-of-day-reflections`);
+        const eodRes = await authedFetch("/end_of_day_reflections");
         if (!eodRes.ok) throw new Error(`eod HTTP ${eodRes.status}`);
         const eodData: EodReflection[] = await eodRes.json();
 
         // Fetch trap & tracks
-        const trapRes = await fetch(`${API_BASE}/trap_and_track`);
+        const trapRes = await authedFetch("/trap_and_track");
         if (!trapRes.ok) throw new Error(`trap HTTP ${trapRes.status}`);
         const trapData: TrapTrack[] = await trapRes.json();
 
         // Fetch gratitude entries
-        const gratRes = await fetch(`${API_BASE}/gratitude_entries`);
+        const gratRes = await authedFetch("/gratitude_entries");
         if (!gratRes.ok) throw new Error(`gratitude HTTP ${gratRes.status}`);
         const gratData: GratitudeEntry[] = await gratRes.json();
 
         // Fetch outside-in actions
-        const outsideRes = await fetch(`${API_BASE}/outside_in_actions`);
+        const outsideRes = await authedFetch("/outside_in_actions");
         if (!outsideRes.ok)
           throw new Error(`outside-in HTTP ${outsideRes.status}`);
         const outsideData: OutsideInEntry[] = await outsideRes.json();
 
         // Fetch where-i-am reflections
-        const whereRes = await fetch(`${API_BASE}/where_i_am_reflections`);
+        const whereRes = await authedFetch("/where_i_am_reflections");
         if (!whereRes.ok) throw new Error(`whereiam HTTP ${whereRes.status}`);
         const whereData: WhereIAmEntry[] = await whereRes.json();
 
         // Fetch daily plans
-        const planRes = await fetch(`${API_BASE}/daily_plans`);
+        const planRes = await authedFetch("/daily_plans");
         if (!planRes.ok) throw new Error(`daily_plans HTTP ${planRes.status}`);
         const planData: DailyPlanEntry[] = await planRes.json();
 
         // Fetch long term visions
-        const ltvRes = await fetch(`${API_BASE}/long_term_visions`);
+        const ltvRes = await authedFetch("/long_term_visions");
         if (!ltvRes.ok)
           throw new Error(`long_term_visions HTTP ${ltvRes.status}`);
         const ltvData: LongTermVisionEntry[] = await ltvRes.json();
 
         // Fetch weekly reflections
-        const weeklyRes = await fetch(`${API_BASE}/weekly_reflections`);
+        const weeklyRes = await authedFetch("/weekly_reflections");
         if (!weeklyRes.ok)
           throw new Error(`weekly_reflections HTTP ${weeklyRes.status}`);
         const weeklyData: WeeklyReflectionEntry[] = await weeklyRes.json();

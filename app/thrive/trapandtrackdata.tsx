@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 export default function TrapTrackEntryDataScreen() {
@@ -54,8 +54,7 @@ export default function TrapTrackEntryDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(
-        `${API_BASE}/trap_and_track/${params.id}`,
+      const res = await authedFetch(`/trap_and_track/${params.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -106,10 +105,9 @@ export default function TrapTrackEntryDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(
-        `${API_BASE}/trap_and_track/${id}`,
-        { method: "DELETE" }
-      );
+      const res = await authedFetch(`/trap_and_track/${id}`, {
+        method: "DELETE",
+      });
 
       if (!res.ok && res.status !== 204) {
         throw new Error(`HTTP ${res.status}`);

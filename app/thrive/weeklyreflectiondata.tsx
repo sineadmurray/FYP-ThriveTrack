@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type Params = {
@@ -65,7 +65,7 @@ export default function WeeklyReflectionDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/weekly_reflections/${params.id}`, {
+      const res = await authedFetch(`/weekly_reflections/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -107,7 +107,7 @@ export default function WeeklyReflectionDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/weekly_reflections/${id}`, {
+      const res = await authedFetch(`/weekly_reflections/${id}`, {
         method: "DELETE",
       });
 

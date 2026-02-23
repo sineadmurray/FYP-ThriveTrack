@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 export default function OutsideThinkingDataScreen() {
@@ -46,7 +46,7 @@ export default function OutsideThinkingDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/outside_in_actions/${params.id}`, {
+      const res = await authedFetch(`/outside_in_actions/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action_text: trimmed }),
@@ -79,7 +79,7 @@ export default function OutsideThinkingDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/outside_in_actions/${id}`, {
+      const res = await authedFetch(`/outside_in_actions/${id}`, {
         method: "DELETE",
       });
 

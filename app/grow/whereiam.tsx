@@ -14,10 +14,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 type SectionKey = "mind" | "body" | "career" | "relationships";
 
@@ -39,8 +38,6 @@ export default function WhereIAmNowScreen() {
   });
 
   const payload = {
-    user_id: DEMO_USER_ID,
-
     mind_now: sections.mind.now,
     mind_want: sections.mind.want,
 
@@ -54,18 +51,19 @@ export default function WhereIAmNowScreen() {
     relationships_want: sections.relationships.want,
   };
 
-
   async function handleSave() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/where_i_am_reflections`, {
+      const res = await authedFetch("/where_i_am_reflections", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
 
       Alert.alert("Saved✅", "Your reflection has been saved.", [
         { text: "OK", onPress: () => router.back() },

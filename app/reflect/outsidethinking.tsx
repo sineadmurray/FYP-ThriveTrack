@@ -16,9 +16,9 @@ import {
   View,
 } from "react-native";
 import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 type OutsideInPrompt = {
   id: number;
@@ -100,11 +100,11 @@ export default function OutsideThinking() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/outside_in_actions`, {
+      // ✅ AUTHED route: use authedFetch + DO NOT send user_id
+      const res = await authedFetch("/outside_in_actions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: DEMO_USER_ID,
           prompt_id: prompt.id,
           action_text: value,
         }),

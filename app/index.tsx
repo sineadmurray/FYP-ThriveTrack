@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // Importing the Expo Router to navigate between screens
+import { useFocusEffect, useRouter } from "expo-router"; // Importing the Expo Router to navigate between screens
 import React, { useEffect, useState } from "react"; // Importing React and useState to manage component state
 import {
   ActivityIndicator,
@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native"; // Importing React Native components used in the UI
 import { API_BASE } from "../lib/api";
+import { authedFetch } from "../lib/authedFetch";
 import SideDrawer from "./components/SideDrawer"; // Importing the custom side drawer menu component
 
 export default function Home() {
@@ -22,7 +23,7 @@ type Quote = { quote_text: string; author: string };
 
 type MoodEntry = {
   id: string;
-  user_id: string;
+  user_id?: string;
   mood: string;
   mood_value: number;
   notes: string | null;
@@ -31,14 +32,14 @@ type MoodEntry = {
 
 type DailyPlan = {
   id: string;
-  user_id: string;
+  user_id?: string;
   created_at: string;
 };
 
 const [quote, setQuote] = useState<Quote | null>(null);
 const [loadingQuote, setLoadingQuote] = useState(true);
 
-const userId = "demo-student-1";
+
 
 const [loadingStatus, setLoadingStatus] = useState(true);
 const [moodLoggedToday, setMoodLoggedToday] = useState(false);
@@ -80,20 +81,21 @@ useEffect(() => {
   loadQuote();
 }, []);
 
-useEffect(() => {
-  const loadStatus = async () => {
-    try {
+useFocusEffect(
+  React.useCallback(() => {
+    const loadStatus = async () => {
+      try {
       setLoadingStatus(true);
 
       // mood latest
-      const moodRes = await fetch(`${API_BASE}/mood_entries?user_id=${encodeURIComponent(userId)}`);
+      const moodRes = await authedFetch("/mood_entries");
       const moodRows: MoodEntry[] = moodRes.ok ? await moodRes.json() : [];
       const moodLatest = moodRows.length ? moodRows[0] : null;
       setLatestMood(moodLatest);
       setMoodLoggedToday(moodLatest ? isToday(moodLatest.created_at) : false);
 
       // plan latest
-      const planRes = await fetch(`${API_BASE}/daily_plans?user_id=${encodeURIComponent(userId)}`);
+      const planRes = await authedFetch("/daily_plans");
       const planRows: DailyPlan[] = planRes.ok ? await planRes.json() : [];
       const planLatest = planRows.length ? planRows[0] : null;
       setPlannerDoneToday(planLatest ? isToday(planLatest.created_at) : false);
@@ -107,8 +109,9 @@ useEffect(() => {
     }
   };
 
-  loadStatus();
-}, []);
+    loadStatus();
+  }, [])
+);
 
   return (
     <View style={styles.root}>

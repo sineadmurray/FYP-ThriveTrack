@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 
@@ -42,7 +42,7 @@ export default function MoodEntryDataScreen() {
 
     try {
       setSaving(true);
-      const res = await fetch(`${API_BASE}/mood_entries/${params.id}`, {
+      const res = await authedFetch(`/mood_entries/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,7 +85,7 @@ export default function MoodEntryDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/mood_entries/${id}`, {
+      const res = await authedFetch(`/mood_entries/${id}`, {
         method: "DELETE",
       });
 

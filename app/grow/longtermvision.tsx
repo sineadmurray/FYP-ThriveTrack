@@ -14,10 +14,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 export default function LongTermVisionScreen() {
   const router = useRouter();
@@ -29,7 +28,6 @@ export default function LongTermVisionScreen() {
 
   const payload = useMemo(
     () => ({
-      user_id: DEMO_USER_ID,
       vision,
       clear_direction: clearDirection,
     }),
@@ -40,14 +38,15 @@ export default function LongTermVisionScreen() {
     try {
       setSaving(true);
 
-      // Change endpoint to match API
-      const res = await fetch(`${API_BASE}/long_term_visions`, {
+      const res = await authedFetch("/long_term_visions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || `HTTP ${res.status}`);
+    }
 
       Alert.alert("Saved✅", "Your vision has been saved.", [
         { text: "OK", onPress: () => router.back() },

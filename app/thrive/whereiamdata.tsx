@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type Params = {
@@ -64,7 +64,7 @@ export default function WhereIAmEntryDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/where_i_am_reflections/${params.id}`, {
+      const res = await authedFetch(`/where_i_am_reflections/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -107,7 +107,7 @@ export default function WhereIAmEntryDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/where_i_am_reflections/${id}`, {
+      const res = await authedFetch(`/where_i_am_reflections/${id}`, {
         method: "DELETE",
       });
 

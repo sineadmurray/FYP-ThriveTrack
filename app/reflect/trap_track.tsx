@@ -14,10 +14,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 export default function TrapTrackScreen() {
   const router = useRouter();
@@ -37,29 +36,27 @@ export default function TrapTrackScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/trap_and_track`, {
+      const res = await authedFetch("/trap_and_track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: DEMO_USER_ID,
-          circumstance: circumstance,
-          trigger: trigger,
-          response: response,
-          avoidance: avoidance,
-          consequence: consequence,
-          copingstrategy: copingstrategy,
-          tryalternative: tryalternative,
-          consequenceafter: consequenceafter,
+          circumstance,
+          trigger,
+          response,
+          avoidance,
+          consequence,
+          copingstrategy,
+          tryalternative,
+          consequenceafter,
         }),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       Alert.alert("Saved✅", "Your Trap & Track has been saved.", [
         { text: "OK", onPress: () => router.back() },
       ]);
+
     } catch (e) {
       console.log("Save TT error", e);
       Alert.alert("Oops", "Could not save your Trap & Track. Please try again.");

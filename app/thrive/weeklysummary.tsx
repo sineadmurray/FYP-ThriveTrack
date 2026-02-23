@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type WeeklySummaryCounts = {
@@ -22,8 +22,7 @@ type WeeklySummaryCounts = {
 export default function WeeklySummaryScreen() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const userId = "demo-student-1"; 
+ 
 
   const [data, setData] = useState<WeeklySummaryCounts | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,58 +47,61 @@ export default function WeeklySummaryScreen() {
   //** code sourced from Chatgpt conversation **//
 
   const fetchWeeklyCounts = async () => {
-    try {
-      setLoading(true);
-      setErrorMsg(null);
+  try {
+    setLoading(true);
+    setErrorMsg(null);
 
-      const url = `${API_BASE}/weekly_summary?user_id=${encodeURIComponent(userId)}`;
-      const res = await fetch(url);
+    // If your server reads user from auth, you don't need user_id.
+    // If it STILL needs it, keep the query param line below.
+    // const res = await authedFetch(`/weekly_summary?user_id=${encodeURIComponent(userId)}`);
+    const res = await authedFetch("/weekly_summary");
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Request failed (${res.status})`);
-      }
-
-      const json = (await res.json()) as WeeklySummaryCounts;
-      setData(json);
-    } catch (e: any) {
-      console.error("weekly_summary fetch error:", e);
-      setErrorMsg("Could not load your weekly summary. Please try again.");
-      setData(null);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `Request failed (${res.status})`);
     }
-  };
+
+    const json = (await res.json()) as WeeklySummaryCounts;
+    setData(json);
+  } catch (e: any) {
+    console.error("weekly_summary fetch error:", e);
+    setErrorMsg("Could not load your weekly summary. Please try again.");
+    setData(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   //** code sourced from Chatgpt conversation **//
   //...//
   const fetchWeeklyAISummary = async () => {
-    try {
-      setAiLoading(true);
-      setAiError(null);
-  
-      const res = await fetch(`${API_BASE}/weekly_summary_ai`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId }),
-      });
-  
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Request failed (${res.status})`);
-      }
-  
-      const json = await res.json();
-      // Backend returns: { summary: { overallMoodTrend: [...], ... } }
-      setAiSummary(json.summary);
-    } catch (e: any) {
-      console.error("weekly_summary_ai fetch error:", e);
-      setAiError("Could not generate your AI summary. Please try again.");
-      setAiSummary(null);
-    } finally {
-      setAiLoading(false);
+  try {
+    setAiLoading(true);
+    setAiError(null);
+
+    // If your server reads user from auth, no body is needed.
+    // If it STILL needs user_id, keep the JSON.stringify line.
+    const res = await authedFetch("/weekly_summary_ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // body: JSON.stringify({ user_id: userId }),
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `Request failed (${res.status})`);
     }
-  };
+
+    const json = await res.json();
+    setAiSummary(json.summary);
+  } catch (e: any) {
+    console.error("weekly_summary_ai fetch error:", e);
+    setAiError("Could not generate your AI summary. Please try again.");
+    setAiSummary(null);
+  } finally {
+    setAiLoading(false);
+  }
+};
   //...//
   //** code sourced from Chatgpt conversation **//
 

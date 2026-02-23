@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 export default function EodEntryDataScreen() {
@@ -46,19 +46,16 @@ export default function EodEntryDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(
-        `${API_BASE}/end-of-day-reflections/${params.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            went_well: wentWell,
-            learned,
-            proud_of: proudOf,
-            self_care: selfCare,
-          }),
-        }
-      );
+      const res = await authedFetch(`/end_of_day_reflections/${params.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          went_well: wentWell,
+          learned,
+          proud_of: proudOf,
+          self_care: selfCare,
+        }),
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
@@ -94,10 +91,7 @@ export default function EodEntryDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(
-        `${API_BASE}/end-of-day-reflections/${id}`,
-        { method: "DELETE" }
-      );
+      const res = await authedFetch(`/end_of_day_reflections/${id}`, { method: "DELETE" });
 
       if (!res.ok && res.status !== 204) {
         throw new Error(`HTTP ${res.status}`);

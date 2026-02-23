@@ -14,10 +14,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 export default function DailyReflectionScreen() {
   const router = useRouter();
@@ -33,11 +32,9 @@ export default function DailyReflectionScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/end-of-day-reflections`, {
+      const res = await authedFetch("/end_of_day_reflections", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: DEMO_USER_ID,
           went_well: wentWell,
           learned,
           proud_of: proudOf,
@@ -46,7 +43,8 @@ export default function DailyReflectionScreen() {
       });
 
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+        const msg = await res.text();
+        throw new Error(msg || `HTTP ${res.status}`);
       }
 
       Alert.alert("Saved✅", "Your daily reflection has been saved.", [

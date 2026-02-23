@@ -14,10 +14,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
-
-const DEMO_USER_ID = "demo-student-1";
 
 export default function DailyPlannerScreen() {
   const router = useRouter();
@@ -35,7 +33,6 @@ export default function DailyPlannerScreen() {
 
   const payload = useMemo(
     () => ({
-      user_id: DEMO_USER_ID,
       main_goal: mainGoal,
       priority_1: priority1,
       priority_2: priority2,
@@ -53,14 +50,15 @@ export default function DailyPlannerScreen() {
     try {
       setSaving(true);
 
-      // Change endpoint to match API
-      const res = await fetch(`${API_BASE}/daily_plans`, {
+      const res = await authedFetch("/daily_plans", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
 
       Alert.alert("Saved ✅", "Your plan has been saved.", [
         { text: "OK", onPress: () => router.back() },

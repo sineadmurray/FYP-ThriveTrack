@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 export default function GratitudeDataScreen() {
@@ -45,7 +45,7 @@ export default function GratitudeDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/gratitude_entries/${params.id}`, {
+      const res = await authedFetch(`/gratitude_entries/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: trimmed }),
@@ -74,7 +74,7 @@ export default function GratitudeDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/gratitude_entries/${id}`, {
+      const res = await authedFetch(`/gratitude_entries/${id}`, {
         method: "DELETE",
       });
 

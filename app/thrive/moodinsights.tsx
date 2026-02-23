@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { LineChart, PieChart } from "react-native-gifted-charts";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type MoodEntry = {
@@ -85,8 +85,6 @@ export default function MoodInsightsScreen() {
   const [showSupportPrompt, setShowSupportPrompt] = useState(false);
   const supportShownOnceRef = useRef(false);
 
-  // TEMP user id
-  const userId = "demo-student-1";
 
   useEffect(() => {
     const load = async () => {
@@ -94,8 +92,9 @@ export default function MoodInsightsScreen() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`${API_BASE}/mood_entries?user_id=${userId}`);
+        const res = await authedFetch("/mood_entries");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const data: MoodEntry[] = await res.json();
         setEntries(data);
       } catch (e: any) {

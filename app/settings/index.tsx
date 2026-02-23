@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { supabase } from "../../lib/supabase";
 import SideDrawer from "../components/SideDrawer";
 
 // Theme (same vibe as your other screens)
@@ -25,9 +26,25 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Placeholder profile values
-  const displayName = "Sinead";
-  const email = "sinead@email.com";
+  const [displayName, setDisplayName] = useState("—");
+  const [email, setEmail] = useState("—");
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+
+      setEmail(user?.email ?? "—");
+
+      // If you store a name in metadata, this will work:
+      const name =
+        (user?.user_metadata as any)?.full_name ||
+        (user?.user_metadata as any)?.name ||
+        "—";
+
+      setDisplayName(name);
+    })();
+  }, []);
 
   function confirmDelete() {
     Alert.alert(
@@ -46,6 +63,22 @@ export default function SettingsScreen() {
       ]
     );
   }
+
+  async function handleLogout() {
+  Alert.alert("Log out?", "You will need to sign in again to access your account.", [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: "Log out",
+      style: "destructive",
+      onPress: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          Alert.alert("Logout failed", error.message);
+        }
+      },
+    },
+  ]);
+}
 
   return (
     <View style={styles.root}>
@@ -176,7 +209,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* LOGOUT */}
-        <Pressable onPress={() => {}} style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}>
+        <Pressable onPress={handleLogout} style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}>
           <Text style={styles.logoutText}>Logout</Text>
         </Pressable>
 

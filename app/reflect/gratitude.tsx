@@ -14,10 +14,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
-const DEMO_USER_ID = "demo-student-1";
 
 const INSPIRATION = [
   "A person who supports me",
@@ -48,39 +47,38 @@ export default function DailyGratitudeScreen() {
   const trimmed = useMemo(() => gratitude.slice(0, maxLen), [gratitude]);
 
 async function handleSave() {
-    const value = trimmed.trim();
+  const value = trimmed.trim();
 
-    if (!value) {
-        Alert.alert("Add something", "Write one thing you’re grateful for first.");
-        return;
+  if (!value) {
+    Alert.alert("Add something", "Write one thing you’re grateful for first.");
+    return;
+  }
+
+  try {
+    setSaving(true);
+
+    const res = await authedFetch("/gratitude_entries", {
+      method: "POST",
+      body: JSON.stringify({ text: value }),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || `HTTP ${res.status}`);
     }
 
-    try {
-        setSaving(true);
+    Alert.alert("Saved ✅", "Your gratitude has been saved.", [
+      { text: "OK", onPress: () => router.back() },
+    ]);
 
-        const res = await fetch(`${API_BASE}/gratitude_entries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            user_id: DEMO_USER_ID,
-            text: value,
-        }),
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        Alert.alert("Saved ✅", "Your gratitude has been saved.", [
-        { text: "OK", onPress: () => router.back() },
-        ]);
-
-        setGratitude("");
-    } catch (e: any) {
-        console.log("Save gratitude error:", e?.message || e);
-        Alert.alert("Oops", "Could not save your gratitude. Please try again.");
-    } finally {
-        setSaving(false);
-    }
-    }
+    setGratitude("");
+  } catch (e: any) {
+    console.log("Save gratitude error:", e?.message || e);
+    Alert.alert("Oops", e?.message || "Could not save your gratitude. Please try again.");
+  } finally {
+    setSaving(false);
+  }
+}
 
 
     return (

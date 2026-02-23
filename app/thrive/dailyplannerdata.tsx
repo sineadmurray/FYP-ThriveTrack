@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type Params = {
@@ -59,7 +59,7 @@ export default function DailyPlannerEntryDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/daily_plans/${params.id}`, {
+      const res = await authedFetch(`/daily_plans/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,7 +102,7 @@ export default function DailyPlannerEntryDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/daily_plans/${id}`, { method: "DELETE" });
+      const res = await authedFetch(`/daily_plans/${id}`, { method: "DELETE" });
 
       if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
 

@@ -14,7 +14,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { API_BASE, createMoodEntry } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type MoodKey = "Struggling" | "Low" | "Okay" | "Good" | "Amazing";
@@ -52,18 +52,22 @@ export default function MoodJournalScreen() {
       // keep notes reasonable
       const trimmed = notes.trim().slice(0, 300);
 
-      // TEMP user id — replace with real auth later
+
       const payload = {
-        user_id: "demo-student-1",
-        mood: selectedMood, // string
-        mood_value: selected.value, 
+        mood: selectedMood,
+        mood_value: selected.value,
         notes: trimmed || undefined,
       };
 
-      // console for debugging if anything goes wrong
-      console.log("POST /mood_entries →", API_BASE, payload);
+      const res = await authedFetch("/mood_entries", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-      await createMoodEntry(payload);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `HTTP ${res.status}`);
+}
 
       Alert.alert("Saved ✅", "Your mood entry has been saved.");
       setNotes("");

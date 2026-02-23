@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { API_BASE } from "../../lib/api";
+import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
 
 type Params = {
@@ -44,7 +44,7 @@ export default function LongTermVisionDataScreen() {
     try {
       setSaving(true);
 
-      const res = await fetch(`${API_BASE}/long_term_visions/${params.id}`, {
+      const res = await authedFetch(`/long_term_visions/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,7 +81,7 @@ export default function LongTermVisionDataScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/long_term_visions/${id}`, {
+      const res = await authedFetch(`/long_term_visions/${id}`, {
         method: "DELETE",
       });
 
