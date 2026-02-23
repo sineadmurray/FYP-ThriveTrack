@@ -4,6 +4,7 @@ import cors from 'cors'; // CORS allows mobile app to connect to your API from a
 import pkg from 'pg'; // PostgreSQL client library
 import morgan from 'morgan'; // HTTP request logger (shows GET, POST, etc. in the terminal)
 import OpenAI from "openai";
+import { createClient } from "@supabase/supabase-js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -11,6 +12,35 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const { Pool } = pkg; // Extract the Pool class (used for database connections)
 
 const app = express(); // Create an Express application instance
+
+// Supabase server client (verifies JWTs from the mobile app)
+const supabaseServer = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function requireAuth(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length)
+      : null;
+
+    if (!token) return res.status(401).json({ error: "missing_token" });
+
+    const { data, error } = await supabaseServer.auth.getUser(token);
+
+    if (error || !data?.user) {
+      return res.status(401).json({ error: "invalid_token" });
+    }
+
+    req.userId = data.user.id;
+    next();
+  } catch (e) {
+    console.error("requireAuth error:", e);
+    return res.status(401).json({ error: "unauthorized" });
+  }
+}
 
 // CORS + JSON
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'] })); // Allow all origins (mobile phone, Expo tunnel, web etc.)
@@ -183,21 +213,17 @@ app.post('/init', async (_req, res) => {
 });
 
 // create mood entry
-app.post('/mood_entries', async (req, res) => {
+app.post("/mood_entries", requireAuth, async (req, res) => {
   try {
-    const { user_id, mood, mood_value, notes } = req.body;
+    const userId = req.userId;
+    const { mood, mood_value, notes } = req.body;
 
-    if (!user_id || !mood || !mood_value) {
-      return res.status(400).json({
-        error: 'user_id, mood, and mood_value are required'
-      });
+    if (!mood || !mood_value) {
+      return res.status(400).json({ error: "mood and mood_value are required" });
     }
 
-    // safety: enforce valid range
     if (mood_value < 1 || mood_value > 5) {
-      return res.status(400).json({
-        error: 'mood_value must be between 1 and 5'
-      });
+      return res.status(400).json({ error: "mood_value must be between 1 and 5" });
     }
 
     const { rows } = await pool.query(
@@ -206,29 +232,30 @@ app.post('/mood_entries', async (req, res) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *
       `,
-      [user_id, mood, mood_value, notes ?? null]
+      [userId, mood, mood_value, notes ?? null]
     );
 
     res.status(201).json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'create_failed' });
+    res.status(500).json({ error: "create_failed" });
   }
 });
 
-
 // list mood entries
-app.get('/mood_entries', async (req, res) => {
+app.get("/mood_entries", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-    const q = user_id
-      ? { text: 'SELECT * FROM mood_entries WHERE user_id=$1 ORDER BY created_at DESC', values: [user_id] }
-      : { text: 'SELECT * FROM mood_entries ORDER BY created_at DESC', values: [] };
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+
+    const { rows } = await pool.query(
+      "SELECT * FROM mood_entries WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
+
     res.json(rows);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'list_failed' });
+    res.status(500).json({ error: "list_failed" });
   }
 });
 
