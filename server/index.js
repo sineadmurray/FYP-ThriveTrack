@@ -1020,10 +1020,10 @@ app.delete("/weekly_reflections/:id", async (req, res) => {
 });
 
 // create daily plan
-app.post("/daily_plans", async (req, res) => {
+app.post("/daily_plans", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const {
-      user_id,
       main_goal,
       priority_1,
       priority_2,
@@ -1034,15 +1034,13 @@ app.post("/daily_plans", async (req, res) => {
       notes,
     } = req.body;
 
-    if (!user_id) return res.status(400).json({ error: "user_id is required" });
-
     const { rows } = await pool.query(
       `INSERT INTO daily_plans
        (user_id, main_goal, priority_1, priority_2, priority_3, other_todos, self_care_actions, productivity_reward, notes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        RETURNING *`,
       [
-        user_id,
+        userId,
         main_goal ?? null,
         priority_1 ?? null,
         priority_2 ?? null,
@@ -1062,21 +1060,15 @@ app.post("/daily_plans", async (req, res) => {
 });
 
 // list daily plans
-app.get("/daily_plans", async (req, res) => {
+app.get("/daily_plans", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const userId = req.userId;
 
-    const q = user_id
-      ? {
-          text: "SELECT * FROM daily_plans WHERE user_id=$1 ORDER BY created_at DESC",
-          values: [user_id],
-        }
-      : {
-          text: "SELECT * FROM daily_plans ORDER BY created_at DESC",
-          values: [],
-        };
+    const { rows } = await pool.query(
+      "SELECT * FROM daily_plans WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
 
-    const { rows } = await pool.query(q);
     res.json(rows);
   } catch (e) {
     console.error(e);
