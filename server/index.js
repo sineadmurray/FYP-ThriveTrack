@@ -221,17 +221,14 @@ app.post("/mood_entries", requireAuth, async (req, res) => {
     if (!mood || !mood_value) {
       return res.status(400).json({ error: "mood and mood_value are required" });
     }
-
     if (mood_value < 1 || mood_value > 5) {
       return res.status(400).json({ error: "mood_value must be between 1 and 5" });
     }
 
     const { rows } = await pool.query(
-      `
-      INSERT INTO mood_entries (user_id, mood, mood_value, notes)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
-      `,
+      `INSERT INTO mood_entries (user_id, mood, mood_value, notes)
+       VALUES ($1,$2,$3,$4)
+       RETURNING *`,
       [userId, mood, mood_value, notes ?? null]
     );
 
@@ -246,12 +243,10 @@ app.post("/mood_entries", requireAuth, async (req, res) => {
 app.get("/mood_entries", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-
     const { rows } = await pool.query(
       "SELECT * FROM mood_entries WHERE user_id=$1 ORDER BY created_at DESC",
       [userId]
     );
-
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -260,165 +255,139 @@ app.get("/mood_entries", requireAuth, async (req, res) => {
 });
 
 // update one mood entry
-app.put('/mood_entries/:id', async (req, res) => {
+app.put("/mood_entries/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { mood, mood_value, notes } = req.body;
 
     if (!mood || !mood_value) {
-      return res.status(400).json({
-        error: 'mood and mood_value are required'
-      });
+      return res.status(400).json({ error: "mood and mood_value are required" });
     }
-
     if (mood_value < 1 || mood_value > 5) {
-      return res.status(400).json({
-        error: 'mood_value must be between 1 and 5'
-      });
+      return res.status(400).json({ error: "mood_value must be between 1 and 5" });
     }
 
     const { rows } = await pool.query(
-      `
-      UPDATE mood_entries
-      SET mood=$2,
-          mood_value=$3,
-          notes=$4
-      WHERE id=$1
-      RETURNING *
-      `,
-      [id, mood, mood_value, notes ?? null]
+      `UPDATE mood_entries
+       SET mood=$3, mood_value=$4, notes=$5
+       WHERE id=$1 AND user_id=$2
+       RETURNING *`,
+      [id, userId, mood, mood_value, notes ?? null]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
     res.json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'update_failed' });
+    res.status(500).json({ error: "update_failed" });
   }
 });
 
 
 // delete one mood entry
-app.delete('/mood_entries/:id', async (req, res) => {
+app.delete("/mood_entries/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
+
     const result = await pool.query(
-      'DELETE FROM mood_entries WHERE id=$1',
-      [id]
+      "DELETE FROM mood_entries WHERE id=$1 AND user_id=$2",
+      [id, userId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
-    res.status(204).send(); // no content
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+    res.status(204).send();
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'delete_failed' });
+    res.status(500).json({ error: "delete_failed" });
   }
 });
 
 // create end-of-day reflection
-app.post('/end-of-day-reflections', async (req, res) => {
+app.post("/end_of_day_reflections", requireAuth, async (req, res) => {
   try {
-    const { user_id, went_well, learned, proud_of, self_care } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required' });
-    }
+    const userId = req.userId;
+    const { went_well, learned, proud_of, self_care } = req.body;
 
     const { rows } = await pool.query(
       `INSERT INTO end_of_day_reflections
-        (user_id, went_well, learned, proud_of, self_care)
+       (user_id, went_well, learned, proud_of, self_care)
        VALUES ($1,$2,$3,$4,$5)
        RETURNING *`,
-      [user_id, went_well ?? null, learned ?? null, proud_of ?? null, self_care ?? null]
+      [userId, went_well ?? null, learned ?? null, proud_of ?? null, self_care ?? null]
     );
 
     res.status(201).json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'eod_create_failed' });
+    res.status(500).json({ error: "eod_create_failed" });
   }
 });
 
 // list end-of-day reflections
-app.get('/end-of-day-reflections', async (req, res) => {
+app.get("/end_of_day_reflections", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-    const q = user_id
-      ? {
-          text: 'SELECT * FROM end_of_day_reflections WHERE user_id=$1 ORDER BY created_at DESC',
-          values: [user_id],
-        }
-      : {
-          text: 'SELECT * FROM end_of_day_reflections ORDER BY created_at DESC',
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM end_of_day_reflections WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'eod_list_failed' });
+    res.status(500).json({ error: "eod_list_failed" });
   }
 });
 
 // update one end-of-day reflection
-app.put('/end-of-day-reflections/:id', async (req, res) => {
+app.put("/end_of_day_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { went_well, learned, proud_of, self_care } = req.body;
 
     const { rows } = await pool.query(
       `UPDATE end_of_day_reflections
-       SET went_well=$2, learned=$3, proud_of=$4, self_care=$5
-       WHERE id=$1
+       SET went_well=$3, learned=$4, proud_of=$5, self_care=$6
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
-      [id, went_well ?? null, learned ?? null, proud_of ?? null, self_care ?? null]
+      [id, userId, went_well ?? null, learned ?? null, proud_of ?? null, self_care ?? null]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
     res.json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'eod_update_failed' });
+    res.status(500).json({ error: "eod_update_failed" });
   }
 });
 
 // delete one end-of-day reflection
-app.delete('/end-of-day-reflections/:id', async (req, res) => {
+app.delete("/end_of_day_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
     const result = await pool.query(
-      'DELETE FROM end_of_day_reflections WHERE id=$1',
-      [id]
+      "DELETE FROM end_of_day_reflections WHERE id=$1 AND user_id=$2",
+      [id, userId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'eod_delete_failed' });
+    res.status(500).json({ error: "eod_delete_failed" });
   }
 });
 
 
 // create trap & track entry
-app.post('/trap_and_track', async (req, res) => {
+app.post("/trap_and_track", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const {
-      user_id,
       circumstance,
       trigger,
       response,
@@ -429,17 +398,13 @@ app.post('/trap_and_track', async (req, res) => {
       consequenceafter,
     } = req.body;
 
-    if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required' });
-    }
-
     const { rows } = await pool.query(
       `INSERT INTO trap_and_track
-        (user_id, circumstance, trigger, response, avoidance, consequence, copingstrategy, tryalternative, consequenceafter)
+       (user_id, circumstance, trigger, response, avoidance, consequence, copingstrategy, tryalternative, consequenceafter)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        RETURNING *`,
       [
-        user_id,
+        userId,
         circumstance ?? null,
         trigger ?? null,
         response ?? null,
@@ -454,36 +419,31 @@ app.post('/trap_and_track', async (req, res) => {
     res.status(201).json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'tt_create_failed' });
+    res.status(500).json({ error: "tt_create_failed" });
   }
 });
 
+
 // list trap & track entries 
-app.get('/trap_and_track', async (req, res) => {
+app.get("/trap_and_track", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: 'SELECT * FROM trap_and_track WHERE user_id=$1 ORDER BY created_at DESC',
-          values: [user_id],
-        }
-      : {
-          text: 'SELECT * FROM trap_and_track ORDER BY created_at DESC',
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM trap_and_track WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'tt_list_failed' });
+    res.status(500).json({ error: "tt_list_failed" });
   }
 });
 
+
 // update one trap & track entry
-app.put('/trap_and_track/:id', async (req, res) => {
+app.put("/trap_and_track/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
     const {
@@ -499,18 +459,19 @@ app.put('/trap_and_track/:id', async (req, res) => {
 
     const { rows } = await pool.query(
       `UPDATE trap_and_track
-       SET circumstance=$2,
-           trigger=$3,
-           response=$4,
-           avoidance=$5,
-           consequence=$6,
-           copingstrategy=$7,
-           tryalternative=$8,
-           consequenceafter=$9
-       WHERE id=$1
+       SET circumstance=$3,
+           trigger=$4,
+           response=$5,
+           avoidance=$6,
+           consequence=$7,
+           copingstrategy=$8,
+           tryalternative=$9,
+           consequenceafter=$10
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
       [
         id,
+        userId,
         circumstance ?? null,
         trigger ?? null,
         response ?? null,
@@ -522,50 +483,46 @@ app.put('/trap_and_track/:id', async (req, res) => {
       ]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
+    if (rows.length === 0) return res.status(404).json({ error: "not_found" });
     res.json(rows[0]);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'tt_update_failed' });
+    res.status(500).json({ error: "tt_update_failed" });
   }
 });
 
 // delete one trap & track entry
-app.delete('/trap_and_track/:id', async (req, res) => {
+app.delete("/trap_and_track/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
     const result = await pool.query(
-      'DELETE FROM trap_and_track WHERE id=$1',
-      [id]
+      "DELETE FROM trap_and_track WHERE id=$1 AND user_id=$2",
+      [id, userId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'not_found' });
-    }
-
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'tt_delete_failed' });
+    res.status(500).json({ error: "tt_delete_failed" });
   }
 });
 
 // create gratitude entry
-app.post("/gratitude_entries", async (req, res) => {
+app.post("/gratitude_entries", requireAuth, async (req, res) => {
   try {
-    const { user_id, text } = req.body;
+    const userId = req.userId;
+    const { text } = req.body;
 
-    if (!user_id || !text || !text.trim()) {
-      return res.status(400).json({ error: "user_id and text are required" });
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "text is required" });
     }
 
     const { rows } = await pool.query(
       "INSERT INTO gratitude_entries (user_id, text) VALUES ($1,$2) RETURNING *",
-      [user_id, text.trim()]
+      [userId, text.trim()]
     );
 
     res.status(201).json(rows[0]);
@@ -575,22 +532,15 @@ app.post("/gratitude_entries", async (req, res) => {
   }
 });
 
+
 // list gratitude entries
-app.get("/gratitude_entries", async (req, res) => {
+app.get("/gratitude_entries", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: "SELECT * FROM gratitude_entries WHERE user_id=$1 ORDER BY created_at DESC",
-          values: [user_id],
-        }
-      : {
-          text: "SELECT * FROM gratitude_entries ORDER BY created_at DESC",
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM gratitude_entries WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -599,22 +549,20 @@ app.get("/gratitude_entries", async (req, res) => {
 });
 
 // update one gratitude entry
-app.put("/gratitude_entries/:id", async (req, res) => {
+app.put("/gratitude_entries/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { text } = req.body;
 
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: "text is required" });
-    }
+    if (!text || !text.trim()) return res.status(400).json({ error: "text is required" });
 
     const { rows } = await pool.query(
-      "UPDATE gratitude_entries SET text=$2 WHERE id=$1 RETURNING *",
-      [id, text.trim()]
+      "UPDATE gratitude_entries SET text=$3 WHERE id=$1 AND user_id=$2 RETURNING *",
+      [id, userId, text.trim()]
     );
 
     if (rows.length === 0) return res.status(404).json({ error: "not_found" });
-
     res.json(rows[0]);
   } catch (e) {
     console.error(e);
@@ -623,16 +571,17 @@ app.put("/gratitude_entries/:id", async (req, res) => {
 });
 
 // delete one gratitude entry
-app.delete("/gratitude_entries/:id", async (req, res) => {
+app.delete("/gratitude_entries/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
-    const result = await pool.query("DELETE FROM gratitude_entries WHERE id=$1", [
-      id,
-    ]);
+    const result = await pool.query(
+      "DELETE FROM gratitude_entries WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
 
     if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
-
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -702,19 +651,20 @@ app.get("/outside_in/:promptId/inspirations", async (req, res) => {
 });
 
 // create outside-in action
-app.post("/outside_in_actions", async (req, res) => {
+app.post("/outside_in_actions", requireAuth, async (req, res) => {
   try {
-    const { user_id, prompt_id, action_text } = req.body;
+    const userId = req.userId;
+    const { prompt_id, action_text } = req.body;
 
-    if (!user_id || !prompt_id || !action_text || !action_text.trim()) {
-      return res.status(400).json({ error: "user_id, prompt_id and action_text are required" });
+    if (!prompt_id || !action_text || !action_text.trim()) {
+      return res.status(400).json({ error: "prompt_id and action_text are required" });
     }
 
     const { rows } = await pool.query(
       `INSERT INTO outside_in_actions (user_id, prompt_id, action_text)
        VALUES ($1,$2,$3)
        RETURNING *`,
-      [user_id, prompt_id, action_text.trim()]
+      [userId, prompt_id, action_text.trim()]
     );
 
     res.status(201).json(rows[0]);
@@ -725,26 +675,13 @@ app.post("/outside_in_actions", async (req, res) => {
 });
 
 // list outside-in actions
-app.get("/outside_in_actions", async (req, res) => {
+app.get("/outside_in_actions", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: `SELECT *
-                 FROM outside_in_actions
-                 WHERE user_id=$1
-                 ORDER BY created_at DESC`,
-          values: [user_id],
-        }
-      : {
-          text: `SELECT *
-                 FROM outside_in_actions
-                 ORDER BY created_at DESC`,
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM outside_in_actions WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -753,8 +690,9 @@ app.get("/outside_in_actions", async (req, res) => {
 });
 
 // update one outside-in action
-app.put("/outside_in_actions/:id", async (req, res) => {
+app.put("/outside_in_actions/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { action_text } = req.body;
 
@@ -764,14 +702,13 @@ app.put("/outside_in_actions/:id", async (req, res) => {
 
     const { rows } = await pool.query(
       `UPDATE outside_in_actions
-       SET action_text=$2
-       WHERE id=$1
+       SET action_text=$3
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
-      [id, action_text.trim()]
+      [id, userId, action_text.trim()]
     );
 
     if (rows.length === 0) return res.status(404).json({ error: "not_found" });
-
     res.json(rows[0]);
   } catch (e) {
     console.error(e);
@@ -780,17 +717,17 @@ app.put("/outside_in_actions/:id", async (req, res) => {
 });
 
 // delete one outside-in action
-app.delete("/outside_in_actions/:id", async (req, res) => {
+app.delete("/outside_in_actions/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
     const result = await pool.query(
-      `DELETE FROM outside_in_actions WHERE id=$1`,
-      [id]
+      "DELETE FROM outside_in_actions WHERE id=$1 AND user_id=$2",
+      [id, userId]
     );
 
     if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
-
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -800,17 +737,19 @@ app.delete("/outside_in_actions/:id", async (req, res) => {
 
 
 // create where-i-am reflection
-app.post("/where_i_am_reflections", async (req, res) => {
+app.post("/where_i_am_reflections", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const {
-      user_id,
-      mind_now, mind_want,
-      body_now, body_want,
-      career_now, career_want,
-      relationships_now, relationships_want,
+      mind_now,
+      mind_want,
+      body_now,
+      body_want,
+      career_now,
+      career_want,
+      relationships_now,
+      relationships_want,
     } = req.body;
-
-    if (!user_id) return res.status(400).json({ error: "user_id is required" });
 
     const { rows } = await pool.query(
       `INSERT INTO where_i_am_reflections
@@ -818,11 +757,15 @@ app.post("/where_i_am_reflections", async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        RETURNING *`,
       [
-        user_id,
-        mind_now ?? null, mind_want ?? null,
-        body_now ?? null, body_want ?? null,
-        career_now ?? null, career_want ?? null,
-        relationships_now ?? null, relationships_want ?? null,
+        userId,
+        mind_now ?? null,
+        mind_want ?? null,
+        body_now ?? null,
+        body_want ?? null,
+        career_now ?? null,
+        career_want ?? null,
+        relationships_now ?? null,
+        relationships_want ?? null,
       ]
     );
 
@@ -834,21 +777,13 @@ app.post("/where_i_am_reflections", async (req, res) => {
 });
 
 // list where-i-am reflections
-app.get("/where_i_am_reflections", async (req, res) => {
+app.get("/where_i_am_reflections", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: "SELECT * FROM where_i_am_reflections WHERE user_id=$1 ORDER BY created_at DESC",
-          values: [user_id],
-        }
-      : {
-          text: "SELECT * FROM where_i_am_reflections ORDER BY created_at DESC",
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM where_i_am_reflections WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -857,30 +792,41 @@ app.get("/where_i_am_reflections", async (req, res) => {
 });
 
 // update one where-i-am reflection
-app.put("/where_i_am_reflections/:id", async (req, res) => {
+app.put("/where_i_am_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
+
     const {
-      mind_now, mind_want,
-      body_now, body_want,
-      career_now, career_want,
-      relationships_now, relationships_want,
+      mind_now,
+      mind_want,
+      body_now,
+      body_want,
+      career_now,
+      career_want,
+      relationships_now,
+      relationships_want,
     } = req.body;
 
     const { rows } = await pool.query(
       `UPDATE where_i_am_reflections
-       SET mind_now=$2, mind_want=$3,
-           body_now=$4, body_want=$5,
-           career_now=$6, career_want=$7,
-           relationships_now=$8, relationships_want=$9
-       WHERE id=$1
+       SET mind_now=$3, mind_want=$4,
+           body_now=$5, body_want=$6,
+           career_now=$7, career_want=$8,
+           relationships_now=$9, relationships_want=$10
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
       [
         id,
-        mind_now ?? null, mind_want ?? null,
-        body_now ?? null, body_want ?? null,
-        career_now ?? null, career_want ?? null,
-        relationships_now ?? null, relationships_want ?? null,
+        userId,
+        mind_now ?? null,
+        mind_want ?? null,
+        body_now ?? null,
+        body_want ?? null,
+        career_now ?? null,
+        career_want ?? null,
+        relationships_now ?? null,
+        relationships_want ?? null,
       ]
     );
 
@@ -892,14 +838,19 @@ app.put("/where_i_am_reflections/:id", async (req, res) => {
   }
 });
 
+
 // delete one where_i_am_reflection
-app.delete("/where_i_am_reflections/:id", async (req, res) => {
+app.delete("/where_i_am_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
-    const result = await pool.query("DELETE FROM where_i_am_reflections WHERE id=$1", [id]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+    const result = await pool.query(
+      "DELETE FROM where_i_am_reflections WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
 
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -908,17 +859,18 @@ app.delete("/where_i_am_reflections/:id", async (req, res) => {
 });
 
 // create weekly reflection
-app.post("/weekly_reflections", async (req, res) => {
+app.post("/weekly_reflections", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const {
-      user_id,
-      mind, body, career, relationships,
+      mind,
+      body,
+      career,
+      relationships,
       held_me_back,
       lesson_learned,
       next_weeks_focus,
     } = req.body;
-
-    if (!user_id) return res.status(400).json({ error: "user_id is required" });
 
     const { rows } = await pool.query(
       `INSERT INTO weekly_reflections
@@ -926,7 +878,7 @@ app.post("/weekly_reflections", async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        RETURNING *`,
       [
-        user_id,
+        userId,
         mind ?? null,
         body ?? null,
         career ?? null,
@@ -945,21 +897,13 @@ app.post("/weekly_reflections", async (req, res) => {
 });
 
 // list weekly reflections
-app.get("/weekly_reflections", async (req, res) => {
+app.get("/weekly_reflections", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: "SELECT * FROM weekly_reflections WHERE user_id=$1 ORDER BY created_at DESC",
-          values: [user_id],
-        }
-      : {
-          text: "SELECT * FROM weekly_reflections ORDER BY created_at DESC",
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM weekly_reflections WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -967,12 +911,17 @@ app.get("/weekly_reflections", async (req, res) => {
   }
 });
 
+
 // update one weekly reflection
-app.put("/weekly_reflections/:id", async (req, res) => {
+app.put("/weekly_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const {
-      mind, body, career, relationships,
+      mind,
+      body,
+      career,
+      relationships,
       held_me_back,
       lesson_learned,
       next_weeks_focus,
@@ -980,12 +929,13 @@ app.put("/weekly_reflections/:id", async (req, res) => {
 
     const { rows } = await pool.query(
       `UPDATE weekly_reflections
-       SET mind=$2, body=$3, career=$4, relationships=$5,
-           held_me_back=$6, lesson_learned=$7, next_weeks_focus=$8
-       WHERE id=$1
+       SET mind=$3, body=$4, career=$5, relationships=$6,
+           held_me_back=$7, lesson_learned=$8, next_weeks_focus=$9
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
       [
         id,
+        userId,
         mind ?? null,
         body ?? null,
         career ?? null,
@@ -1005,13 +955,17 @@ app.put("/weekly_reflections/:id", async (req, res) => {
 });
 
 // delete one weekly reflection
-app.delete("/weekly_reflections/:id", async (req, res) => {
+app.delete("/weekly_reflections/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
-    const result = await pool.query("DELETE FROM weekly_reflections WHERE id=$1", [id]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+    const result = await pool.query(
+      "DELETE FROM weekly_reflections WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
 
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -1063,12 +1017,10 @@ app.post("/daily_plans", requireAuth, async (req, res) => {
 app.get("/daily_plans", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-
     const { rows } = await pool.query(
       "SELECT * FROM daily_plans WHERE user_id=$1 ORDER BY created_at DESC",
       [userId]
     );
-
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -1077,9 +1029,11 @@ app.get("/daily_plans", requireAuth, async (req, res) => {
 });
 
 // update one daily plan
-app.put("/daily_plans/:id", async (req, res) => {
+app.put("/daily_plans/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
+
     const {
       main_goal,
       priority_1,
@@ -1093,18 +1047,19 @@ app.put("/daily_plans/:id", async (req, res) => {
 
     const { rows } = await pool.query(
       `UPDATE daily_plans
-       SET main_goal=$2,
-           priority_1=$3,
-           priority_2=$4,
-           priority_3=$5,
-           other_todos=$6,
-           self_care_actions=$7,
-           productivity_reward=$8,
-           notes=$9
-       WHERE id=$1
+       SET main_goal=$3,
+           priority_1=$4,
+           priority_2=$5,
+           priority_3=$6,
+           other_todos=$7,
+           self_care_actions=$8,
+           productivity_reward=$9,
+           notes=$10
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
       [
         id,
+        userId,
         main_goal ?? null,
         priority_1 ?? null,
         priority_2 ?? null,
@@ -1125,13 +1080,17 @@ app.put("/daily_plans/:id", async (req, res) => {
 });
 
 // delete one daily plan
-app.delete("/daily_plans/:id", async (req, res) => {
+app.delete("/daily_plans/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
-    const result = await pool.query("DELETE FROM daily_plans WHERE id=$1", [id]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+    const result = await pool.query(
+      "DELETE FROM daily_plans WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
 
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -1139,18 +1098,18 @@ app.delete("/daily_plans/:id", async (req, res) => {
   }
 });
 
-// create long-term vision
-app.post("/long_term_visions", async (req, res) => {
-  try {
-    const { user_id, vision, clear_direction } = req.body;
 
-    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+// create long-term vision
+app.post("/long_term_visions", requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { vision, clear_direction } = req.body;
 
     const { rows } = await pool.query(
       `INSERT INTO long_term_visions (user_id, vision, clear_direction)
        VALUES ($1,$2,$3)
        RETURNING *`,
-      [user_id, vision ?? null, clear_direction ?? null]
+      [userId, vision ?? null, clear_direction ?? null]
     );
 
     res.status(201).json(rows[0]);
@@ -1161,21 +1120,13 @@ app.post("/long_term_visions", async (req, res) => {
 });
 
 // list long-term visions
-app.get("/long_term_visions", async (req, res) => {
+app.get("/long_term_visions", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    const q = user_id
-      ? {
-          text: "SELECT * FROM long_term_visions WHERE user_id=$1 ORDER BY created_at DESC",
-          values: [user_id],
-        }
-      : {
-          text: "SELECT * FROM long_term_visions ORDER BY created_at DESC",
-          values: [],
-        };
-
-    const { rows } = await pool.query(q);
+    const userId = req.userId;
+    const { rows } = await pool.query(
+      "SELECT * FROM long_term_visions WHERE user_id=$1 ORDER BY created_at DESC",
+      [userId]
+    );
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -1184,17 +1135,18 @@ app.get("/long_term_visions", async (req, res) => {
 });
 
 // update one long-term vision
-app.put("/long_term_visions/:id", async (req, res) => {
+app.put("/long_term_visions/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { vision, clear_direction } = req.body;
 
     const { rows } = await pool.query(
       `UPDATE long_term_visions
-       SET vision=$2, clear_direction=$3
-       WHERE id=$1
+       SET vision=$3, clear_direction=$4
+       WHERE id=$1 AND user_id=$2
        RETURNING *`,
-      [id, vision ?? null, clear_direction ?? null]
+      [id, userId, vision ?? null, clear_direction ?? null]
     );
 
     if (rows.length === 0) return res.status(404).json({ error: "not_found" });
@@ -1206,13 +1158,17 @@ app.put("/long_term_visions/:id", async (req, res) => {
 });
 
 // delete one long-term vision
-app.delete("/long_term_visions/:id", async (req, res) => {
+app.delete("/long_term_visions/:id", requireAuth, async (req, res) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
-    const result = await pool.query("DELETE FROM long_term_visions WHERE id=$1", [id]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
+    const result = await pool.query(
+      "DELETE FROM long_term_visions WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
 
+    if (result.rowCount === 0) return res.status(404).json({ error: "not_found" });
     res.status(204).send();
   } catch (e) {
     console.error(e);
@@ -1222,15 +1178,9 @@ app.delete("/long_term_visions/:id", async (req, res) => {
 
 // WEEKLY SUMMARY (last 7 days)
 // Returns counts for Mood Logs, Reflect Entries, and Grow Entries (grouped).
-app.get("/weekly_summary", async (req, res) => {
+app.get("/weekly_summary", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.query;
-
-    if (!user_id) {
-      return res.status(400).json({ error: "user_id is required" });
-    }
-
-    // Postgres will handle the "last 7 days" window
+    const userId = req.userId;
     const since = "NOW() - INTERVAL '7 days'";
 
     // Mood logs = mood_entries
@@ -1238,7 +1188,7 @@ app.get("/weekly_summary", async (req, res) => {
       `SELECT COUNT(*)::int AS count
        FROM mood_entries
        WHERE user_id = $1 AND created_at >= ${since}`,
-      [user_id]
+      [userId]
     );
 
     // Reflect entries (Reflect section)
@@ -1250,7 +1200,7 @@ app.get("/weekly_summary", async (req, res) => {
           (SELECT COUNT(*) FROM trap_and_track          WHERE user_id=$1 AND created_at >= ${since}) +
           (SELECT COUNT(*) FROM outside_in_actions      WHERE user_id=$1 AND created_at >= ${since})
         )::int AS count`,
-      [user_id]
+      [userId]
     );
 
     // Grow entries (Grow section)
@@ -1262,7 +1212,7 @@ app.get("/weekly_summary", async (req, res) => {
           (SELECT COUNT(*) FROM where_i_am_reflections WHERE user_id=$1 AND created_at >= ${since}) +
           (SELECT COUNT(*) FROM weekly_reflections     WHERE user_id=$1 AND created_at >= ${since})
         )::int AS count`,
-      [user_id]
+      [userId]
     );
 
     res.json({
@@ -1278,10 +1228,9 @@ app.get("/weekly_summary", async (req, res) => {
 
 //** code sourced from chatgpt conversation **// 
 //....//
-app.post("/weekly_summary_ai", async (req, res) => {
+app.post("/weekly_summary_ai", requireAuth, async (req, res) => {
   try {
-    const { user_id } = req.body; // send user_id in body (or switch to auth later)
-    if (!user_id) return res.status(400).json({ error: "user_id is required" });
+      const userId = req.userId;
 
     // 1) Pull last 7 days of *actual content* from the DB
     // Keep this minimal to reduce tokens + protect privacy.
@@ -1292,7 +1241,7 @@ app.post("/weekly_summary_ai", async (req, res) => {
        FROM mood_entries
        WHERE user_id=$1 AND created_at >= ${since}
        ORDER BY created_at ASC`,
-      [user_id]
+      [userId]
     );
 
     const eod = await pool.query(
@@ -1300,7 +1249,7 @@ app.post("/weekly_summary_ai", async (req, res) => {
        FROM end_of_day_reflections
        WHERE user_id=$1 AND created_at >= ${since}
        ORDER BY created_at ASC`,
-      [user_id]
+      [userId]
     );
 
     const gratitude = await pool.query(
@@ -1308,7 +1257,7 @@ app.post("/weekly_summary_ai", async (req, res) => {
        FROM gratitude_entries
        WHERE user_id=$1 AND created_at >= ${since}
        ORDER BY created_at ASC`,
-      [user_id]
+      [userId]
     );
 
     const growWeekly = await pool.query(
@@ -1316,16 +1265,17 @@ app.post("/weekly_summary_ai", async (req, res) => {
        FROM weekly_reflections
        WHERE user_id=$1 AND created_at >= ${since}
        ORDER BY created_at ASC`,
-      [user_id]
+      [userId]
     );
 
     // Combine into one payload for the model
-    const weeklyData = {
+      const weeklyData = {
       moods: moods.rows,
       endOfDayReflections: eod.rows,
       gratitude: gratitude.rows,
       weeklyReflections: growWeekly.rows,
     };
+
 
     // 2) Define a strict output shape (so your RN UI can render bullet lists reliably)
     const schema = {
@@ -1336,15 +1286,15 @@ app.post("/weekly_summary_ai", async (req, res) => {
         whatFeltPositive: { type: "string" },
         whatFeltChallenging: { type: "string" },
         gentleSuggestion: { type: "string" },
-        note: { type: "string" }
+        note: { type: "string" },
       },
       required: [
         "overallMoodTrend",
         "whatFeltPositive",
         "whatFeltChallenging",
         "gentleSuggestion",
-        "note"
-      ]
+        "note",
+      ],
     };
 
     // 3) Call OpenAI (Responses API) to generate the weekly summary
@@ -1381,20 +1331,20 @@ app.post("/weekly_summary_ai", async (req, res) => {
               type: "input_text",
               text:
                 "Create a weekly wellbeing summary from the following last-7-days data (JSON):\n\n" +
-                JSON.stringify(weeklyData)
-            }
-          ]
-        }
+                JSON.stringify(weeklyData),
+            },
+          ],
+        },
       ],
       text: {
         format: {
           type: "json_schema",
-          name: "weekly_summary",   
-          schema,                  
+          name: "weekly_summary",
+          schema,
           strict: true,
         },
       },
-      max_output_tokens: 350
+      max_output_tokens: 350,
     });
 
     // 4) Convert the model output into a JS object
