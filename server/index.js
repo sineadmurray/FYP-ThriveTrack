@@ -1386,6 +1386,138 @@ app.post("/weekly_summary_ai", requireAuth, async (req, res) => {
 //....//
 //** code sourced from chatgpt conversation **// 
 
+// --- AI Reflection Assistant (simple, non-streaming) ---
+
+const AI_MODEL = "gpt-4o-mini"; // good default for cost/latency
+
+function buildSystemPrompt() {
+  return `
+You are ThriveTrack’s AI Reflection Assistant for university students.
+
+Role:
+- Calm, supportive conversational companion
+- Reflective listening (“a diary that talks back”)
+- Light wellbeing coach (subtly CBT-informed)
+
+Do:
+- Validate feelings and normalize stress in student life
+- Ask 1–2 gentle follow-up questions
+- Offer 1–3 small coping strategies (grounding, breathing, journaling prompts, planning a tiny next step)
+- Encourage one small positive action the user can do today
+- Use warm, human language and short paragraphs
+
+Do NOT:
+- Provide medical/clinical advice or instructions
+- Diagnose conditions
+- Claim you are a therapist or replace professional help
+
+Safety:
+- If the user indicates risk of self-harm, suicide, or immediate danger:
+  * Encourage reaching out to local emergency services and crisis supports
+  * Keep it short, supportive, and action-oriented
+  * Do not provide detailed methods or plans
+`.trim();
+}
+
+// VERY BASIC keyword detection (you can expand carefully)
+function detectCrisis(text) {
+  const t = (text || "").toLowerCase();
+
+  // Phrases indicating possible self-harm / suicide ideation
+  const patterns = [
+    /\bkill myself\b/,
+    /\bsuicide\b/,
+    /\bend my life\b/,
+    /\bwant to die\b/,
+    /\bself[-\s]?harm\b/,
+    /\bhurt myself\b/,
+    /\bcan’t go on\b/,
+    /\bno reason to live\b/,
+  ];
+
+  return patterns.some((re) => re.test(t));
+}
+
+function crisisResponse() {
+  // Ireland-focused since your timezone is Dublin; still broadly usable.
+  // Emergency numbers: 112 or 999 in Ireland. :contentReference[oaicite:2]{index=2}
+  // Samaritans Ireland: 116 123, email jo@samaritans.ie :contentReference[oaicite:3]{index=3}
+  // Pieta crisis helpline page (number shown there). :contentReference[oaicite:4]{index=4}
+  return {
+    reply: [
+      "I’m really sorry you’re feeling this way. You don’t have to carry it alone.",
+      "",
+      "If you’re in immediate danger or might act on these feelings, please call **112 or 999** right now (Ireland) or your local emergency number.",
+      "",
+      "You can also reach out for free, confidential support:",
+      "• **Samaritans (Ireland): 116 123** (24/7) or **jo@samaritans.ie**",
+      "• **Pieta Crisis Helpline:** see Pieta’s 24/7 helpline options",
+      "",
+      "If you can, tell me: **are you safe right now**, and is there someone you can contact (a friend, family member, or your campus support service) to be with you?"
+    ].join("\n"),
+    flags: { crisis: true }
+  };
+}
+
+app.post("/ai/reflection", requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId; // available if you want to log minimal metadata
+    const { text, messages } = req.body;
+
+    // Accept either { text } or { messages }
+    let convo = [];
+
+    if (Array.isArray(messages) && messages.length > 0) {
+      // sanitize + clamp
+      convo = messages
+        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+        .slice(-12); // keep last N messages only
+    } else if (typeof text === "string" && text.trim()) {
+      convo = [{ role: "user", content: text.trim() }];
+    } else {
+      return res.status(400).json({ error: "invalid_input" });
+    }
+
+    const lastUserMsg = [...convo].reverse().find((m) => m.role === "user")?.content || "";
+    if (lastUserMsg.length > 1500) {
+      return res.status(400).json({ error: "message_too_long" });
+    }
+
+    // Crisis gate (don’t call the model)
+    if (detectCrisis(lastUserMsg)) {
+      return res.json(crisisResponse());
+    }
+
+    const instructions = buildSystemPrompt();
+
+    // Responses API (recommended for new projects) :contentReference[oaicite:5]{index=5}
+    const input = convo.map((m) => ({
+      role: m.role,
+      content: [{ type: "input_text", text: m.content }],
+    }));
+
+    const ai = await openai.responses.create({
+      model: AI_MODEL,
+      instructions,
+      input,
+      max_output_tokens: 300,
+    });
+
+    const reply = (ai.output_text || "").trim();
+    if (!reply) {
+      return res.status(502).json({ error: "empty_model_reply" });
+    }
+
+    res.json({
+      reply,
+      flags: { crisis: false },
+    });
+  } catch (e) {
+    console.error("ai/reflection error:", e);
+    res.status(500).json({ error: "ai_reflection_failed" });
+  }
+});
+
 
 const port = process.env.PORT || 4000;
 
