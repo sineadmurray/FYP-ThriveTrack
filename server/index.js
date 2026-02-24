@@ -1461,24 +1461,29 @@ function crisisResponse() {
 
 app.post("/ai/reflection", requireAuth, async (req, res) => {
   try {
-    const userId = req.userId; // available if you want to log minimal metadata
     const { text, messages } = req.body;
 
     // Accept either { text } or { messages }
     let convo = [];
 
     if (Array.isArray(messages) && messages.length > 0) {
-      // sanitize + clamp
       convo = messages
-        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
-        .slice(-12); // keep last N messages only
+        .filter(
+          (m) =>
+            m &&
+            (m.role === "user" || m.role === "assistant") &&
+            typeof m.content === "string"
+        )
+        .slice(-12);
     } else if (typeof text === "string" && text.trim()) {
       convo = [{ role: "user", content: text.trim() }];
     } else {
       return res.status(400).json({ error: "invalid_input" });
     }
 
-    const lastUserMsg = [...convo].reverse().find((m) => m.role === "user")?.content || "";
+    const lastUserMsg =
+      [...convo].reverse().find((m) => m.role === "user")?.content || "";
+
     if (lastUserMsg.length > 1500) {
       return res.status(400).json({ error: "message_too_long" });
     }
@@ -1488,30 +1493,22 @@ app.post("/ai/reflection", requireAuth, async (req, res) => {
       return res.json(crisisResponse());
     }
 
-    const instructions = buildSystemPrompt();
+    const system = buildSystemPrompt();
 
-    // Responses API (recommended for new projects) :contentReference[oaicite:5]{index=5}
-    const input = convo.map((m) => ({
-      role: m.role,
-      content: [{ type: "input_text", text: m.content }],
-    }));
-
-    const ai = await openai.responses.create({
-      model: AI_MODEL,
-      instructions,
-      input,
-      max_output_tokens: 300,
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL, // "gpt-4o-mini"
+      messages: [
+        { role: "system", content: system },
+        ...convo.map((m) => ({ role: m.role, content: m.content })),
+      ],
+      max_tokens: 300,
+      temperature: 0.7,
     });
 
-    const reply = (ai.output_text || "").trim();
-    if (!reply) {
-      return res.status(502).json({ error: "empty_model_reply" });
-    }
+    const reply = completion.choices?.[0]?.message?.content?.trim();
+    if (!reply) return res.status(502).json({ error: "empty_model_reply" });
 
-    res.json({
-      reply,
-      flags: { crisis: false },
-    });
+    res.json({ reply, flags: { crisis: false } });
   } catch (e) {
     console.error("ai/reflection error:", e);
     res.status(500).json({ error: "ai_reflection_failed" });
