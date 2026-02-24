@@ -82,6 +82,7 @@ app.post('/init', async (_req, res) => {
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         user_id TEXT NOT NULL,
         mood TEXT NOT NULL,
+        mood_value INT NOT NULL,  
         notes TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -1260,6 +1261,22 @@ app.post("/weekly_summary_ai", requireAuth, async (req, res) => {
       [userId]
     );
 
+    const outsideIn = await pool.query(
+      `SELECT action_text, created_at
+      FROM outside_in_actions
+      WHERE user_id=$1 AND created_at >= ${since}
+      ORDER BY created_at ASC`,
+      [userId]
+    );
+
+    const plans = await pool.query(
+      `SELECT main_goal, priority_1, priority_2, priority_3, self_care_actions, productivity_reward, notes, created_at
+      FROM daily_plans
+      WHERE user_id=$1 AND created_at >= ${since}
+      ORDER BY created_at ASC`,
+      [userId]
+    );
+
     const growWeekly = await pool.query(
       `SELECT mind, body, career, relationships, held_me_back, lesson_learned, next_weeks_focus, created_at
        FROM weekly_reflections
@@ -1270,11 +1287,13 @@ app.post("/weekly_summary_ai", requireAuth, async (req, res) => {
 
     // Combine into one payload for the model
       const weeklyData = {
-      moods: moods.rows,
-      endOfDayReflections: eod.rows,
-      gratitude: gratitude.rows,
-      weeklyReflections: growWeekly.rows,
-    };
+        moods: moods.rows,
+        dailyReflection: eod.rows,           
+        gratitude: gratitude.rows,
+        outsideInActions: outsideIn.rows,    
+        dailyPlans: plans.rows,              
+        weeklyReflections: growWeekly.rows,  
+      };
 
 
     // 2) Define a strict output shape (so your RN UI can render bullet lists reliably)
@@ -1298,27 +1317,34 @@ app.post("/weekly_summary_ai", requireAuth, async (req, res) => {
     };
 
     // 3) Call OpenAI (Responses API) to generate the weekly summary
-    const instructions = `
-    You are a supportive wellbeing reflection assistant for university students.
+        const instructions = `
+        You are a supportive wellbeing reflection assistant for university students.
 
-    Write in a warm, encouraging, emotionally intelligent tone.
-    
-    You are NOT listing entries.
-    You are identifying patterns and trends across the week.
-    
-    Guidelines:
-    - Interpret emotional trends (improving, fluctuating, steady, mixed).
-    - Highlight meaningful patterns.
-    - Acknowledge effort and resilience.
-    - Normalise challenges without minimising them.
-    - Avoid clinical language or diagnoses.
-    - Write 3–5 sentences per section.
-    - Do NOT repeat raw entry wording.
-    - Do NOT list data.
-    - Create reflective narrative summaries.
-    
-    If self-harm intent appears, gently encourage seeking support.
-    `;
+        Write in a warm, encouraging, emotionally intelligent tone.
+
+        Create a weekly reflection summary ONLY from:
+        - mood entries
+        - daily reflections / positive thoughts
+        - outside-in actions
+        - gratitude entries
+        - daily plans
+        - weekly reflection & review
+
+        Do NOT reference Trap & Track, Where-I-Am reflections, or Long-Term Vision.
+
+        Guidelines:
+        - Identify patterns and trends across the week (not a list of entries).
+        - Interpret emotional trends (improving, fluctuating, steady, mixed).
+        - Highlight meaningful patterns and coping attempts.
+        - Acknowledge effort and resilience.
+        - Normalise challenges without minimising them.
+        - Avoid clinical language or diagnoses.
+        - Write 3–5 sentences per section.
+        - Do NOT repeat raw entry wording.
+        - Do NOT list data.
+
+        If self-harm intent appears, gently encourage seeking support.
+        `;
 
     const ai = await openai.responses.create({
       model: "gpt-4o-mini",
