@@ -10,10 +10,14 @@ import {
   View,
 } from "react-native";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 export default function GrowScreen() {
- const [drawerOpen, setDrawerOpen] = useState(false);
-   const router = useRouter();
+  const { theme } = useTheme();
+  const s = styles(theme);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const router = useRouter();
 
   const items: { title: string; desc: string; onPress?: () => void }[] = [
     {
@@ -37,33 +41,33 @@ export default function GrowScreen() {
   ];
 
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       {/* Main content */}
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* ----- Header ----- */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow & Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow & Thrive</Text>
 
           {/* Hamburger */}
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* ----- Hero ----- */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
-          <View style={styles.mirrorBadge}>
+          <View style={s.mirrorBadge}>
             <Text style={{ fontSize: 22 }}>🌱</Text>
           </View>
-          <Text style={styles.title}>Grow</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.title}>Grow</Text>
+          <Text style={s.subtitle}>
             Set small goals, build routines, and track your progress.
           </Text>
         </View>
@@ -99,35 +103,32 @@ function GrowCard({
   desc: string;
   onPress: () => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, { opacity: pressed ? 0.96 : 1 }]}
+      style={({ pressed }) => [s.card, { opacity: pressed ? 0.96 : 1 }]}
     >
       <View style={{ flex: 1, paddingRight: 12 }}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardDesc}>{desc}</Text>
+        <Text style={s.cardTitle}>{title}</Text>
+        <Text style={s.cardDesc}>{desc}</Text>
       </View>
 
-      <View style={styles.chev}>
+      <View style={s.chev}>
         <Text style={{ fontSize: 18, fontWeight: "700" }}>➜</Text>
       </View>
     </Pressable>
   );
 }
 
-/* Grow Theme (Mint) */
-const BG = "#fbf6f8";        // soft mint background
-const CARD_BG = "#ffffff";
-const MINT = "#9fe7c0";      // main Grow accent
-const MINT_SOFT = "#e8fbf1"; // soft mint accents
-const SHADOW = "#000";
-const TEXT = "#222";
 
-const styles = StyleSheet.create({
+
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: theme.background,
     paddingTop: Platform.OS === "android" ? 35 : 55,
   },
   container: {
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     fontWeight: "600",
-    color: TEXT,
+    color: theme.text,
   },
   menu: {
     width: 28,
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     height: 3,
     width: 24,
     borderRadius: 3,
-    backgroundColor: TEXT,
+    backgroundColor: theme.text,
   },
 
   /* Hero */
@@ -172,10 +173,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: theme.card,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
@@ -186,13 +187,13 @@ const styles = StyleSheet.create({
     fontSize: 36,
     lineHeight: 40,
     fontWeight: "800",
-    color: MINT,
+    color: theme.grow.title,
     textAlign: "center",
     marginTop: 6,
   },
   subtitle: {
     textAlign: "center",
-    color: "#616161",
+    color: theme.subtleText,
     fontSize: 18,
     lineHeight: 26,
     marginTop: 8,
@@ -203,12 +204,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: CARD_BG,
+    backgroundColor: theme.card,
     borderRadius: 22,
     paddingVertical: 18,
     paddingHorizontal: 20,
     marginVertical: 10,
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -218,19 +219,19 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 28,
     fontWeight: "800",
-    color: MINT,
+    color: theme.grow.title,
     marginBottom: 6,
   },
   cardDesc: {
     fontSize: 16,
     lineHeight: 24,
-    color: "#555",
+    color: theme.subtleText,
   },
   chev: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: MINT_SOFT,
+    backgroundColor: theme.grow.inputBg,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 10,

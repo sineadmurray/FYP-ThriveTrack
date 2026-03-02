@@ -13,6 +13,8 @@ import {
   View,
 } from "react-native";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 /* -------------------- */
 /* Types */
@@ -221,48 +223,50 @@ async function openResource(item: ResourceItem) {
 /* -------------------- */
 
 export default function ResourcesScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
 
   return (
-    <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={s.root}>
+      <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow & Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow & Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
         {/* Hero */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
-          <View style={styles.iconBadge}>
+          <View style={s.iconBadge}>
             <Text style={{ fontSize: 22 }}>🤝</Text>
           </View>
-          <Text style={styles.title}>Support & Resources</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.title}>Support & Resources</Text>
+          <Text style={s.subtitle}>
             Helpful links and supports for when you need a{"\n"}little extra help.
           </Text>
         </View>
 
         {/* Quick Support */}
-        <View style={styles.quickPanel}>
-          <Text style={styles.quickTitle}>Need support right now?</Text>
-          <Text style={styles.quickDesc}>
+        <View style={s.quickPanel}>
+          <Text style={s.quickTitle}>Need support right now?</Text>
+          <Text style={s.quickDesc}>
             If you're in crisis or need immediate help, these services are here 24/7.
           </Text>
 
@@ -281,9 +285,9 @@ export default function ResourcesScreen() {
         {/* Sections */}
         {RESOURCE_SECTIONS.map((section) => (
           <View key={section.heading} style={{ marginTop: 12 }}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name={section.icon} size={20} color={PINK} />
-              <Text style={styles.sectionTitle}>{section.heading}</Text>
+            <View style={s.sectionHeader}>
+              <Ionicons name={section.icon} size={20} color={theme.thrive.title} />
+              <Text style={s.sectionTitle}>{section.heading}</Text>
             </View>
 
             {section.items.map((item) => (
@@ -293,9 +297,9 @@ export default function ResourcesScreen() {
         ))}
 
         {/* Footer */}
-        <View style={styles.footerCard}>
+        <View style={s.footerCard}>
           <Text style={{ fontSize: 24, marginBottom: 10 }}>💛</Text>
-          <Text style={styles.footerText}>You're not alone. Support is always available.</Text>
+          <Text style={s.footerText}>You're not alone. Support is always available.</Text>
         </View>
       </ScrollView>
 
@@ -314,241 +318,218 @@ function ResourceCard({
   onPress: () => void;
   variant?: "quick";
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const isQuick = variant === "quick";
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.resourceCard, { opacity: pressed ? 0.96 : 1 }]}>
-      <View style={styles.iconCircle}>
-        <Ionicons name={item.icon} size={18} color={PINK} />
+    <Pressable onPress={onPress} style={({ pressed }) => [s.resourceCard, { opacity: pressed ? 0.96 : 1 }]}>
+      <View style={s.iconCircle}>
+        <Ionicons name={item.icon} size={18} color={theme.thrive.title} />
       </View>
 
       <View style={{ flex: 1, paddingRight: 10 }}>
-        <Text style={styles.resourceTitle}>{item.title}</Text>
-        <Text style={styles.resourceDesc}>{item.desc}</Text>
+        <Text style={s.resourceTitle}>{item.title}</Text>
+        <Text style={s.resourceDesc}>{item.desc}</Text>
       </View>
 
       {isQuick ? (
-        <Ionicons name="open-outline" size={18} color={PINK} />
+        <Ionicons name="open-outline" size={18} color={theme.thrive.title} />
       ) : (
-        <View style={styles.openPill}>
-          <Text style={styles.openText}>Open</Text>
-          <Ionicons name="open-outline" size={14} color={PINK} />
+        <View style={s.openPill}>
+          <Text style={s.openText}>Open</Text>
+          <Ionicons name="open-outline" size={14} color={theme.thrive.title} />
         </View>
       )}
     </Pressable>
   );
 }
 
-/* Theme – pink tones for Thrive */
-const BG = "#fff5f9";
-const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const CHEV_BG = "#ffe0ec";
-const SHADOW = "#000";
-const TEXT = "#222";
+// ✅ ResourcesScreen styles (theme-based)
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  /* Header (copied) */
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    backBtn: {
+      paddingRight: 8,
+      paddingTop: 4,
+    },
+    backArrow: {
+      color: theme.thrive.title,
+      fontSize: 28,
+      marginTop: -2,
+    },
 
-  /* Back row */
-  backRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  backArrow: {
-    color: PINK,
-    fontSize: 28,
-    marginRight: 6,
-    marginTop: -2,
-  },
-  backText: {
-    color: PINK,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  backBtn: {
-    paddingRight: 8,
-    paddingTop: 4,
-  },
+    iconBadge: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: theme.card,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 2,
+      marginBottom: 8,
+    },
+    title: {
+      fontSize: 34,
+      lineHeight: 40,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      textAlign: "center",
+      marginTop: 6,
+    },
+    subtitle: {
+      textAlign: "center",
+      color: theme.subtleText,
+      fontSize: 16,
+      lineHeight: 24,
+      marginTop: 8,
+      marginBottom: 8,
+    },
 
-  /* Hero (copied style) */
-  iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 34,
-    lineHeight: 40,
-    fontWeight: "800",
-    color: PINK,
-    textAlign: "center",
-    marginTop: 6,
-  },
-  subtitle: {
-    textAlign: "center",
-    color: "#616161",
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 8,
-    marginBottom: 8,
-  },
+    quickPanel: {
+      backgroundColor: theme.thrive.panelBg,
+      borderRadius: 22,
+      padding: 18,
+      marginTop: 14,
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    quickTitle: {
+      fontSize: 22,
+      lineHeight: 28,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      marginBottom: 8,
+    },
+    quickDesc: {
+      fontSize: 15,
+      lineHeight: 22,
+      color: theme.subtleText,
+    },
 
-  /* Quick support panel */
-  quickPanel: {
-    backgroundColor: "#fde2ec",
-    borderRadius: 22,
-    padding: 18,
-    marginTop: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.10,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  quickTitle: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: "800",
-    color: PINK,
-    marginBottom: 8,
-  },
-  quickDesc: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#555",
-  },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      marginTop: 10,
+      marginBottom: 8,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: theme.thrive.title,
+    },
 
-  /* Section header */
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 10,
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: PINK,
-  },
+    resourceCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      paddingVertical: 16,
+      paddingHorizontal: 18,
+      marginVertical: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    iconCircle: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: theme.thrive.iconCircleBg,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12,
+    },
+    resourceTitle: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: theme.text,
+      marginBottom: 4,
+    },
+    resourceDesc: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: theme.subtleText,
+    },
 
-  /* Resource cards */
-  resourceCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    marginVertical: 10,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.10,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#fff0f7",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  resourceTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: TEXT,
-    marginBottom: 4,
-  },
-  resourceDesc: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#666",
-  },
+    openPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: theme.thrive.pillBg,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      borderRadius: 999,
+    },
+    openText: {
+      color: theme.thrive.title,
+      fontWeight: "800",
+      fontSize: 13,
+    },
 
-  openPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: CHEV_BG,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 999,
-  },
-  openText: {
-    color: PINK,
-    fontWeight: "800",
-    fontSize: 13,
-  },
-
-  /* Footer */
-  footerCard: {
-    marginTop: 18,
-    backgroundColor: "#f8eaf1",
-    borderRadius: 22,
-    paddingVertical: 26,
-    paddingHorizontal: 18,
-    alignItems: "center",
-  },
-  footerText: {
-    textAlign: "center",
-    color: "#616161",
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "600",
-  },
-});
+    footerCard: {
+      marginTop: 18,
+      backgroundColor: theme.thrive.footerBg, // ✅ new theme key
+      borderRadius: 22,
+      paddingVertical: 26,
+      paddingHorizontal: 18,
+      alignItems: "center",
+    },
+    footerText: {
+      textAlign: "center",
+      color: theme.subtleText,
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: "600",
+    },
+  });

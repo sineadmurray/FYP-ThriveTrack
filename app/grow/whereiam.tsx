@@ -16,6 +16,8 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 
 type SectionKey = "mind" | "body" | "career" | "relationships";
@@ -26,6 +28,8 @@ type SectionState = {
 };
 
 export default function WhereIAmNowScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -90,38 +94,38 @@ export default function WhereIAmNowScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.root}>
+        <View style={s.root}>
           <ScrollView
-            contentContainerStyle={styles.container}
+            contentContainerStyle={s.container}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + Title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
-          <View style={styles.titleCenter}>
-            <Text style={styles.title}>Where I Am Now /</Text>
-            <Text style={styles.title}>Where I Want to Be</Text>
-            <Text style={styles.subtitle}>
+          <View style={s.titleCenter}>
+            <Text style={s.title}>Where I Am Now /</Text>
+            <Text style={s.title}>Where I Want to Be</Text>
+            <Text style={s.subtitle}>
               Reflect on where you are today and where you'd like to grow.
             </Text>
           </View>
@@ -169,13 +173,13 @@ export default function WhereIAmNowScreen() {
         {/* Save button */}
         <Pressable
           style={({ pressed }) => [
-            styles.saveButton,
+            s.saveButton,
             pressed && { transform: [{ scale: 0.99 }] },
             saving && { opacity: 0.8 },
           ]}
           onPress={() => !saving && handleSave()}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={s.saveButtonText}>
             {saving ? "Saving..." : "Save Reflection"}
           </Text>
         </Pressable>
@@ -203,55 +207,50 @@ function DualPromptSection({
   onChangeNow: (t: string) => void;
   onChangeWant: (t: string) => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.sectionCard}>
-      <Text style={styles.sectionTitle}>
-        {icon} <Text style={styles.sectionTitleText}>{title}</Text>
+    <View style={s.sectionCard}>
+      <Text style={s.sectionTitle}>
+        {icon} <Text style={s.sectionTitleText}>{title}</Text>
       </Text>
 
-      <Text style={styles.promptLabel}>Where I Am Now</Text>
-      <View style={styles.inputShell}>
+      <Text style={s.promptLabel}>Where I Am Now</Text>
+      <View style={s.inputShell}>
         <TextInput
           value={nowValue}
           onChangeText={onChangeNow}
           placeholder="Describe your current state..."
-          placeholderTextColor={MINT_PLACEHOLDER}
+          placeholderTextColor={theme.grow.placeholder}
           multiline
-          style={styles.input}
+          style={s.input}
         />
       </View>
 
-      <Text style={[styles.promptLabel, { marginTop: 14 }]}>
+      <Text style={[s.promptLabel, { marginTop: 14 }]}>
         Where I Want To Be
       </Text>
-      <View style={styles.inputShell}>
+      <View style={s.inputShell}>
         <TextInput
           value={wantValue}
           onChangeText={onChangeWant}
           placeholder="Describe where you’d like to grow..."
-          placeholderTextColor={MINT_PLACEHOLDER}
+          placeholderTextColor={theme.grow.placeholder}
           multiline
-          style={styles.input}
+          style={s.input}
         />
       </View>
     </View>
   );
 }
 
-/* Mint theme */
-const BG = "#fbf6f8";
-const TEXT = "#222";
-const MINT = "#9fe7c0";
-const MINT_DARK = "#5fbf93";
-const CARD_BG = "#ffffff";
-const INPUT_BG = "#e8fbf1";
-const MINT_PLACEHOLDER = "#b7e8d0";
-const SHADOW = "#000";
 
-const styles = StyleSheet.create({
+
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: theme.background,
     paddingTop: Platform.OS === "android" ? 35 : 55,
   },
   container: {
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 19,
     fontWeight: "600",
-    color: TEXT,
+    color: theme.text,
   },
   menu: {
     width: 28,
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
     height: 3,
     width: 24,
     borderRadius: 3,
-    backgroundColor: "#444",
+    backgroundColor: theme.text,
   },
 
   titleRow: {
@@ -303,7 +302,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: "#666",
+    color: theme.subtleText,
   },
   titleCenter: {
     flex: 1,
@@ -313,22 +312,22 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 32,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 13,
-    color: "#777",
+    color: theme.subtleText,
     textAlign: "center",
     marginTop: 6,
   },
 
   sectionCard: {
-    backgroundColor: CARD_BG,
+    backgroundColor: theme.card,
     borderRadius: 22,
     padding: 16,
     marginTop: 14,
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 5 },
@@ -337,42 +336,42 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: MINT,
+    color: theme.grow.title,
     marginBottom: 10,
   },
   sectionTitleText: {
-    color: MINT,
+    color: theme.grow.title,
   },
 
   promptLabel: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#111",
+    color: theme.text,
     marginBottom: 8,
   },
   inputShell: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: theme.grow.inputBg,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 12,
     minHeight: 88,
     borderWidth: 1,
-    borderColor: "#c9f3df",
+    borderColor: theme.grow.inputBorder,
   },
   input: {
     fontSize: 14,
-    color: "#2b6a54",
+    color: theme.grow.inputText,
     textAlignVertical: "top",
   },
 
   saveButton: {
     marginTop: 18,
     marginBottom: 8,
-    backgroundColor: MINT,
+    backgroundColor: theme.grow.button,
     borderRadius: 22,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

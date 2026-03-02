@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 // Types from the backend
 type MoodEntry = {
@@ -131,6 +133,8 @@ const GROW_KINDS: ListItem["kind"][] = [
 ];
 
 export default function AccessAllDataScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [items, setItems] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -240,36 +244,36 @@ export default function AccessAllDataScreen() {
   });
 
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + title */}
-        <View style={styles.pageHeader}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.pageHeader}>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>Access All Data</Text>
-            <Text style={styles.subtitle}>
+            <Text style={s.title}>Access All Data</Text>
+            <Text style={s.subtitle}>
               View, edit or delete all your past reflections, moods and plans.
             </Text>
           </View>
@@ -278,18 +282,18 @@ export default function AccessAllDataScreen() {
         </View>
 
         {/* Pills */}
-        <View style={styles.filtersRow}>
+        <View style={s.filtersRow}>
           <Pressable
             onPress={() => setFilter("all")}
             style={[
-              styles.filterPill,
-              filter === "all" && styles.filterPillActive,
+              s.filterPill,
+              filter === "all" && s.filterPillActive,
             ]}
           >
             <Text
               style={[
-                styles.filterText,
-                filter === "all" && styles.filterTextActive,
+                s.filterText,
+                filter === "all" && s.filterTextActive,
               ]}
             >
               All
@@ -299,14 +303,14 @@ export default function AccessAllDataScreen() {
           <Pressable
             onPress={() => setFilter("reflect")}
             style={[
-              styles.filterPill,
-              filter === "reflect" && styles.filterPillActive,
+              s.filterPill,
+              filter === "reflect" && s.filterPillActive,
             ]}
           >
             <Text
               style={[
-                styles.filterText,
-                filter === "reflect" && styles.filterTextActive,
+                s.filterText,
+                filter === "reflect" && s.filterTextActive,
               ]}
             >
               Reflect
@@ -316,14 +320,14 @@ export default function AccessAllDataScreen() {
           <Pressable
             onPress={() => setFilter("grow")}
             style={[
-              styles.filterPill,
-              filter === "grow" && styles.filterPillActive,
+              s.filterPill,
+              filter === "grow" && s.filterPillActive,
             ]}
           >
             <Text
               style={[
-                styles.filterText,
-                filter === "grow" && styles.filterTextActive,
+                s.filterText,
+                filter === "grow" && s.filterTextActive,
               ]}
             >
               Grow
@@ -559,23 +563,25 @@ function EntryRow({
   time: string;
   onPress: () => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.rowCard, { opacity: pressed ? 0.96 : 1 }]}
+      style={({ pressed }) => [s.rowCard, { opacity: pressed ? 0.96 : 1 }]}
     >
-      <View style={styles.rowEmojiBadge}>
+      <View style={s.rowEmojiBadge}>
         <Text style={{ fontSize: 22 }}>{emoji}</Text>
       </View>
 
       <View style={{ flex: 1, paddingRight: 10 }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowMeta}>
+        <Text style={s.rowTitle}>{title}</Text>
+        <Text style={s.rowMeta}>
           {date} — {time}
         </Text>
       </View>
 
-      <View style={styles.chev}>
+      <View style={s.chev}>
         <Text style={{ fontSize: 18, fontWeight: "700" }}>›</Text>
       </View>
     </Pressable>
@@ -600,147 +606,144 @@ function formatDate(iso: string) {
   return { niceDate, niceTime };
 }
 
-/* Pink / Thrive theme */
-const BG = "#fff5f9";
-const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const CHEV_BG = "#ffe0ec";
-const SHADOW = "#000";
-const TEXT = "#222";
+// ✅ AccessAllDataScreen styles (theme-based)
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    pageHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginTop: 8,
+    },
+    backBtn: {
+      paddingRight: 10,
+      paddingTop: 6,
+    },
+    backArrow: {
+      fontSize: 26,
+      color: theme.text,
+    },
+    title: {
+      fontSize: 26,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      textAlign: "center",
+      color: theme.subtleText,
+      fontSize: 14,
+      marginTop: 4,
+    },
 
-  pageHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 8,
-  },
-  backBtn: {
-    paddingRight: 10,
-    paddingTop: 6,
-  },
-  backArrow: {
-    fontSize: 26,
-    color: TEXT,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: PINK,
-    textAlign: "center",
-  },
-  subtitle: {
-    textAlign: "center",
-    color: "#616161",
-    fontSize: 14,
-    marginTop: 4,
-  },
+    filtersRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 10,
+      marginTop: 14,
+      marginBottom: 10,
+    },
+    filterPill: {
+      paddingHorizontal: 18,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: theme.thrive.pillBg,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder, // ✅ new theme key
+    },
+    filterPillActive: {
+      backgroundColor: theme.thrive.title,
+      borderColor: theme.thrive.title,
+    },
+    filterText: {
+      fontSize: 14,
+      color: theme.thrive.pillText, // ✅ new theme key
+      fontWeight: "600",
+    },
+    filterTextActive: {
+      color: "#fff",
+    },
 
-  filtersRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 10,
-    marginTop: 14,
-    marginBottom: 10,
-  },
-  filterPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#fbe0ef",
-  },
-  filterPillActive: {
-    backgroundColor: PINK,
-  },
-  filterText: {
-    fontSize: 14,
-    color: "#8f8f8f",
-    fontWeight: "600",
-  },
-  filterTextActive: {
-    color: "#fff",
-  },
-
-  rowCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginVertical: 6,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  rowEmojiBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff5d9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  rowTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: PINK,
-  },
-  rowMeta: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 2,
-  },
-  chev: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: CHEV_BG,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
-});
+    rowCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.card,
+      borderRadius: 20,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      marginVertical: 6,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 2,
+    },
+    rowEmojiBadge: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.thrive.iconCircleBg,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 10,
+    },
+    rowTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.thrive.title,
+    },
+    rowMeta: {
+      fontSize: 13,
+      color: theme.subtleText,
+      marginTop: 2,
+    },
+    chev: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.thrive.chevBg, // ✅ new theme key
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 8,
+    },
+  });

@@ -16,11 +16,16 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 export default function DailyPlannerScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  
 
   const [mainGoal, setMainGoal] = useState("");
   const [priority1, setPriority1] = useState("");
@@ -78,37 +83,37 @@ export default function DailyPlannerScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.root}>
+        <View style={s.root}>
           <ScrollView
-            contentContainerStyle={styles.container}
+            contentContainerStyle={s.container}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + Title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
-          <View style={styles.titleCenter}>
-            <Text style={styles.title}>Daily Planner</Text>
-            <Text style={styles.subtitle}>
+          <View style={s.titleCenter}>
+            <Text style={s.title}>Daily Planner</Text>
+            <Text style={s.subtitle}>
               Reward yourself for progress — even small wins
             </Text>
           </View>
@@ -166,13 +171,13 @@ export default function DailyPlannerScreen() {
         {/* Save button */}
         <Pressable
           style={({ pressed }) => [
-            styles.saveButton,
+            s.saveButton,
             pressed && { transform: [{ scale: 0.99 }] },
             saving && { opacity: 0.8 },
           ]}
           onPress={() => !saving && handleSave()}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={s.saveButtonText}>
             {saving ? "Saving..." : "Save Plan"}
           </Text>
         </Pressable>
@@ -198,17 +203,19 @@ function PlannerCard({
   onChangeText: (t: string) => void;
   minHeight?: number;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <View style={[styles.inputShell, { minHeight }]}>
+    <View style={s.card}>
+      <Text style={s.cardTitle}>{title}</Text>
+      <View style={[s.inputShell, { minHeight }]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={MINT_PLACEHOLDER}
+          placeholderTextColor={theme.grow.placeholder}
           multiline
-          style={styles.input}
+          style={s.input}
         />
       </View>
     </View>
@@ -224,56 +231,52 @@ function PrioritiesCard({
   values: [string, string, string];
   onChangeTexts: [(t: string) => void, (t: string) => void, (t: string) => void];
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{title}</Text>
+    <View style={s.card}>
+      <Text style={s.cardTitle}>{title}</Text>
 
-      <View style={styles.smallInputShell}>
+      <View style={s.smallInputShell}>
         <TextInput
           value={values[0]}
           onChangeText={onChangeTexts[0]}
           placeholder="Priority #1..."
-          placeholderTextColor={MINT_PLACEHOLDER}
-          style={styles.input}
+          placeholderTextColor={theme.grow.placeholder}
+          style={s.input}
         />
       </View>
 
-      <View style={[styles.smallInputShell, { marginTop: 12 }]}>
+      <View style={[s.smallInputShell, { marginTop: 12 }]}>
         <TextInput
           value={values[1]}
           onChangeText={onChangeTexts[1]}
           placeholder="Priority #2..."
-          placeholderTextColor={MINT_PLACEHOLDER}
-          style={styles.input}
+          placeholderTextColor={theme.grow.placeholder}
+          style={s.input}
         />
       </View>
 
-      <View style={[styles.smallInputShell, { marginTop: 12 }]}>
+      <View style={[s.smallInputShell, { marginTop: 12 }]}>
         <TextInput
           value={values[2]}
           onChangeText={onChangeTexts[2]}
           placeholder="Priority #3..."
-          placeholderTextColor={MINT_PLACEHOLDER}
-          style={styles.input}
+          placeholderTextColor={theme.grow.placeholder}
+          style={s.input}
         />
       </View>
     </View>
   );
 }
 
-/* Mint theme to match screenshot */
-const BG = "#fbf6f8";
-const TEXT = "#222";
-const MINT = "#9fe7c0";
-const CARD_BG = "#ffffff";
-const INPUT_BG = "#e8fbf1";
-const MINT_PLACEHOLDER = "#b7e8d0";
-const SHADOW = "#000";
 
-const styles = StyleSheet.create({
+
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: theme.background,
     paddingTop: Platform.OS === "android" ? 35 : 55,
   },
   container: {
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 19,
     fontWeight: "600",
-    color: TEXT,
+    color: theme.text,
   },
   menu: {
     width: 28,
@@ -309,7 +312,7 @@ const styles = StyleSheet.create({
     height: 3,
     width: 24,
     borderRadius: 3,
-    backgroundColor: "#444",
+    backgroundColor: theme.text,
   },
 
   titleRow: {
@@ -325,7 +328,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: "#666",
+    color: theme.subtleText,
   },
   titleCenter: {
     flex: 1,
@@ -335,22 +338,22 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 36,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 13,
-    color: "#777",
+    color: theme.subtleText,
     textAlign: "center",
     marginTop: 6,
   },
 
   card: {
-    backgroundColor: CARD_BG,
+    backgroundColor: theme.card,
     borderRadius: 26,
     padding: 16,
     marginTop: 14,
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 5 },
@@ -359,40 +362,40 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     marginBottom: 10,
   },
 
   inputShell: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: theme.grow.inputBg,
     borderRadius: 18,
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#c9f3df",
+    borderColor: theme.grow.inputBorder,
   },
   smallInputShell: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: theme.grow.inputBg,
     borderRadius: 18,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: "#c9f3df",
+    borderColor: theme.grow.inputBorder,
   },
   input: {
     fontSize: 14,
-    color: "#2b6a54",
+    color: theme.grow.inputText,
     textAlignVertical: "top",
   },
 
   saveButton: {
     marginTop: 18,
     marginBottom: 8,
-    backgroundColor: MINT,
+    backgroundColor: theme.grow.button,
     borderRadius: 22,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

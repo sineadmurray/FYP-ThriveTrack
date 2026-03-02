@@ -16,9 +16,13 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 
 export default function LongTermVisionScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -66,37 +70,37 @@ export default function LongTermVisionScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.root}>
+        <View style={s.root}>
           <ScrollView
-            contentContainerStyle={styles.container}
+            contentContainerStyle={s.container}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + Title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
-          <View style={styles.titleCenter}>
-            <Text style={styles.title}>Long-Term Vision</Text>
-            <Text style={styles.subtitle}>
+          <View style={s.titleCenter}>
+            <Text style={s.title}>Long-Term Vision</Text>
+            <Text style={s.subtitle}>
               Visualise what success and balance look like for you.
             </Text>
           </View>
@@ -105,25 +109,25 @@ export default function LongTermVisionScreen() {
         </View>
 
         {/* Your Vision */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Your Vision</Text>
-          <View style={[styles.inputShell, { minHeight: 290 }]}>
+        <View style={s.card}>
+          <Text style={s.cardTitle}>Your Vision</Text>
+          <View style={[s.inputShell, { minHeight: 290 }]}>
             <TextInput
               value={vision}
               onChangeText={setVision}
               placeholder="Describe the future you want — how do you want to feel, live, and show up?"
-              placeholderTextColor={MINT_PLACEHOLDER}
+              placeholderTextColor={theme.grow.placeholder}
               multiline
-              style={styles.input}
+              style={s.input}
             />
           </View>
         </View>
 
         {/* SMART helper card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Make Your Vision Clear &amp; Achievable</Text>
+        <View style={s.card}>
+          <Text style={s.cardTitle}>Make Your Vision Clear &amp; Achievable</Text>
 
-          <View style={styles.smartBox}>
+          <View style={s.smartBox}>
             <SmartRow letter="S" label="Specific:" text="What exactly do you want to achieve?" />
             <SmartRow
               letter="M"
@@ -149,16 +153,16 @@ export default function LongTermVisionScreen() {
         </View>
 
         {/* Clear Direction */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Your Clear Direction</Text>
-          <View style={[styles.inputShell, { minHeight: 210 }]}>
+        <View style={s.card}>
+          <Text style={s.cardTitle}>Your Clear Direction</Text>
+          <View style={[s.inputShell, { minHeight: 210 }]}>
             <TextInput
               value={clearDirection}
               onChangeText={setClearDirection}
               placeholder="What’s one clear long-term direction you want to work towards?"
-              placeholderTextColor={MINT_PLACEHOLDER}
+              placeholderTextColor={theme.grow.placeholder}
               multiline
-              style={styles.input}
+              style={s.input}
             />
           </View>
         </View>
@@ -166,13 +170,13 @@ export default function LongTermVisionScreen() {
         {/* Save button */}
         <Pressable
           style={({ pressed }) => [
-            styles.saveButton,
+            s.saveButton,
             pressed && { transform: [{ scale: 0.99 }] },
             saving && { opacity: 0.8 },
           ]}
           onPress={() => !saving && handleSave()}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={s.saveButtonText}>
             {saving ? "Saving..." : "Save Vision"}
           </Text>
         </Pressable>
@@ -194,30 +198,26 @@ function SmartRow({
   label: string;
   text: string;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.smartRow}>
-      <Text style={styles.smartLetter}>{letter}</Text>
-      <Text style={styles.smartText}>
-        <Text style={styles.smartLabel}>{label} </Text>
+    <View style={s.smartRow}>
+      <Text style={s.smartLetter}>{letter}</Text>
+      <Text style={s.smartText}>
+        <Text style={s.smartLabel}>{label} </Text>
         {text}
       </Text>
     </View>
   );
 }
 
-/* Mint theme */
-const BG = "#fbf6f8";
-const TEXT = "#222";
-const MINT = "#9fe7c0";
-const CARD_BG = "#ffffff";
-const INPUT_BG = "#e8fbf1";
-const MINT_PLACEHOLDER = "#b7e8d0";
-const SHADOW = "#000";
 
-const styles = StyleSheet.create({
+
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: theme.background,
     paddingTop: Platform.OS === "android" ? 35 : 55,
   },
   container: {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 19,
     fontWeight: "600",
-    color: TEXT,
+    color: theme.text,
   },
   menu: {
     width: 28,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     height: 3,
     width: 24,
     borderRadius: 3,
-    backgroundColor: "#444",
+    backgroundColor: theme.text,
   },
 
   titleRow: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: "#666",
+    color: theme.subtleText,
   },
   titleCenter: {
     flex: 1,
@@ -279,22 +279,22 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 38,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 13,
-    color: "#777",
+    color: theme.subtleText,
     textAlign: "center",
     marginTop: 6,
   },
 
   card: {
-    backgroundColor: CARD_BG,
+    backgroundColor: theme.card,
     borderRadius: 26,
     padding: 16,
     marginTop: 14,
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 5 },
@@ -303,30 +303,30 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 22,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     marginBottom: 10,
   },
 
   inputShell: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: theme.grow.inputBg,
     borderRadius: 18,
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#c9f3df",
+    borderColor: theme.grow.inputBorder,
   },
   input: {
     fontSize: 14,
-    color: "#2b6a54",
+    color: theme.grow.inputText,
     textAlignVertical: "top",
   },
 
   smartBox: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: theme.grow.inputBg,
     borderRadius: 18,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#c9f3df",
+    borderColor: theme.grow.inputBorder,
   },
   smartRow: {
     flexDirection: "row",
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 22,
     fontWeight: "900",
-    color: MINT,
+    color: theme.grow.title,
     marginRight: 8,
     marginTop: 1,
   },
@@ -346,21 +346,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: "#7a7a7a",
+    color: theme.subtleText,
   },
   smartLabel: {
     fontWeight: "800",
-    color: "#6b6b6b",
+    color: theme.text,
   },
 
   saveButton: {
     marginTop: 18,
     marginBottom: 8,
-    backgroundColor: MINT,
+    backgroundColor: theme.grow.button,
     borderRadius: 22,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: SHADOW,
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

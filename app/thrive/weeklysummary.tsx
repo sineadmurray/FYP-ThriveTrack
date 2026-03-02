@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 type WeeklySummaryCounts = {
   moodCount: number;
@@ -20,6 +22,8 @@ type WeeklySummaryCounts = {
 };
 
 export default function WeeklySummaryScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
  
@@ -118,92 +122,92 @@ export default function WeeklySummaryScreen() {
   
   
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
         {/* Title */}
         <View style={{ alignItems: "center", marginTop: 4 }}>
-          <Text style={styles.iconTop}>✨</Text>
-          <Text style={styles.title}>Weekly Summary</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.iconTop}>✨</Text>
+          <Text style={s.title}>Weekly Summary</Text>
+          <Text style={s.subtitle}>
             Here's a gentle reflection on your past 7 days
           </Text>
         </View>
 
         {/* Loading / Error / Empty */}
         {loading && (
-          <View style={styles.stateBox}>
+          <View style={s.stateBox}>
             <ActivityIndicator />
-            <Text style={styles.stateText}>Loading your week…</Text>
+            <Text style={s.stateText}>Loading your week…</Text>
           </View>
         )}
 
         {!loading && errorMsg && (
-          <View style={styles.stateBox}>
-            <Text style={[styles.stateText, { marginBottom: 10 }]}>{errorMsg}</Text>
-            <Pressable onPress={fetchWeeklyCounts} style={styles.retryBtn}>
-              <Text style={styles.retryBtnText}>Try Again</Text>
+          <View style={s.stateBox}>
+            <Text style={[s.stateText, { marginBottom: 10 }]}>{errorMsg}</Text>
+            <Pressable onPress={fetchWeeklyCounts} style={s.retryBtn}>
+              <Text style={s.retryBtnText}>Try Again</Text>
             </Pressable>
           </View>
         )}
 
         {!loading && isEmpty && (
-          <View style={styles.stateBox}>
-            <Text style={styles.stateTitle}>No entries yet this week</Text>
-            <Text style={styles.stateText}>
+          <View style={s.stateBox}>
+            <Text style={s.stateTitle}>No entries yet this week</Text>
+            <Text style={s.stateText}>
               Start logging moods or reflections to see your weekly summary.
             </Text>
             <Pressable
               onPress={() => router.push("/reflect")} // adjust if your route is different
-              style={styles.retryBtn}
+              style={s.retryBtn}
             >
-              <Text style={styles.retryBtnText}>Log Something</Text>
+              <Text style={s.retryBtnText}>Log Something</Text>
             </Pressable>
           </View>
         )}
 
         {/* Stat cards */}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>🙂</Text>
-              <Text style={styles.statValue}>{moodLogs}</Text>
-              <Text style={styles.statLabel}>Mood{"\n"}Logs</Text>
+          <View style={s.statsRow}>
+            <View style={s.statCard}>
+              <Text style={s.statIcon}>🙂</Text>
+              <Text style={s.statValue}>{moodLogs}</Text>
+              <Text style={s.statLabel}>Mood{"\n"}Logs</Text>
             </View>
 
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>🪞</Text>
-              <Text style={styles.statValue}>{reflectEntries}</Text>
-              <Text style={styles.statLabel}>Reflect{"\n"}Entries</Text>
+            <View style={s.statCard}>
+              <Text style={s.statIcon}>🪞</Text>
+              <Text style={s.statValue}>{reflectEntries}</Text>
+              <Text style={s.statLabel}>Reflect{"\n"}Entries</Text>
             </View>
 
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>🌱</Text>
-              <Text style={styles.statValue}>{growEntries}</Text>
-              <Text style={styles.statLabel}>Grow{"\n"}Entries</Text>
+            <View style={s.statCard}>
+              <Text style={s.statIcon}>🌱</Text>
+              <Text style={s.statValue}>{growEntries}</Text>
+              <Text style={s.statLabel}>Grow{"\n"}Entries</Text>
             </View>
           </View>
         )}
@@ -211,61 +215,61 @@ export default function WeeklySummaryScreen() {
         {/* code sourced from chatgpt conversation */}
         {/* ... */}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.bigCard}>
-            <Text style={styles.bigCardTitle}>Overall Mood Trend</Text>
+          <View style={s.bigCard}>
+            <Text style={s.bigCardTitle}>Overall Mood Trend</Text>
 
-            {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
-            {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
+            {aiLoading && <Text style={s.bodyText}>Generating your summary…</Text>}
+            {!aiLoading && aiError && <Text style={s.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <Text style={styles.bodyText}>
+              <Text style={s.bodyText}>
               {aiSummary.overallMoodTrend}
             </Text>
             )}
           </View>
         )}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.bigCard}>
-            <Text style={styles.bigCardTitle}>What Felt Positive</Text>
+          <View style={s.bigCard}>
+            <Text style={s.bigCardTitle}>What Felt Positive</Text>
 
-            {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
-            {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
+            {aiLoading && <Text style={s.bodyText}>Generating your summary…</Text>}
+            {!aiLoading && aiError && <Text style={s.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <Text style={styles.bodyText}>
+              <Text style={s.bodyText}>
               {aiSummary.whatFeltPositive}
             </Text>
             )}
           </View>
         )}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.bigCard}>
-            <Text style={styles.bigCardTitle}>What Felt Challenging</Text>
+          <View style={s.bigCard}>
+            <Text style={s.bigCardTitle}>What Felt Challenging</Text>
 
-            {aiLoading && <Text style={styles.bodyText}>Generating your summary…</Text>}
-            {!aiLoading && aiError && <Text style={styles.bodyText}>{aiError}</Text>}
+            {aiLoading && <Text style={s.bodyText}>Generating your summary…</Text>}
+            {!aiLoading && aiError && <Text style={s.bodyText}>{aiError}</Text>}
             {!aiLoading && !aiError && aiSummary && (
-              <Text style={styles.bodyText}>
+              <Text style={s.bodyText}>
               {aiSummary.whatFeltChallenging}
             </Text>
             )}
           </View>
         )}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.SuggestionCard}>
-            <Text style={styles.SuggestionTitle}>Gentle Suggestion</Text>
+          <View style={s.SuggestionCard}>
+            <Text style={s.SuggestionTitle}>Gentle Suggestion</Text>
 
             {aiLoading && (
-              <Text style={styles.SuggestionText}>Generating your summary…</Text>
+              <Text style={s.SuggestionText}>Generating your summary…</Text>
             )}
 
             {!aiLoading && aiError && (
-              <Text style={styles.SuggestionText}>{aiError}</Text>
+              <Text style={s.SuggestionText}>{aiError}</Text>
             )}
 
             {!aiLoading && !aiError && aiSummary && (
               <>
-                <Text style={styles.SuggestionText}>{aiSummary.gentleSuggestion}</Text>
+                <Text style={s.SuggestionText}>{aiSummary.gentleSuggestion}</Text>
 
-                <Text style={[styles.disclaimerText, { marginTop: 10 }]}>
+                <Text style={[s.disclaimerText, { marginTop: 10 }]}>
                   {aiSummary.note}
                 </Text>
               </>
@@ -277,20 +281,20 @@ export default function WeeklySummaryScreen() {
 
         {/* Regenerate Button + Disclaimer */}
         {!loading && !errorMsg && !isEmpty && (
-          <View style={styles.footerSection}>
+          <View style={s.footerSection}>
             <Pressable
-              style={styles.regenerateButton}
+              style={s.regenerateButton}
               onPress={() => {
                 fetchWeeklyCounts();
                 fetchWeeklyAISummary();
               }}
             >
-              <Text style={styles.regenerateButtonText}>
+              <Text style={s.regenerateButtonText}>
                 Regenerate Summary
               </Text>
             </Pressable>
 
-            <Text style={styles.disclaimerText}>
+            <Text style={s.disclaimerText}>
               This summary is for reflection only and not medical advice.
             </Text>
           </View>
@@ -302,233 +306,215 @@ export default function WeeklySummaryScreen() {
   );
 }
 
-/* Theme */
-const BG = "#fff5f9";
-const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const TEXT = "#222";
-const SHADOW = "#000";
+// ✅ WeeklySummaryScreen styles (theme-based)
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    backBtn: {
+      paddingRight: 8,
+      paddingTop: 4,
+    },
+    backArrow: {
+      fontSize: 28,
+      color: theme.thrive.title,
+      marginTop: -2,
+    },
 
-  backRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 4,
-  },
-  backArrow: {
-    fontSize: 28,
-    color: PINK,
-    marginTop: -2,
-  },
-  backText: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: PINK,
-  },
-  backBtn: {
-    paddingRight: 8,
-    paddingTop: 4,
-  },
+    iconTop: {
+      fontSize: 34,
+      marginBottom: 6,
+    },
+    title: {
+      fontSize: 42,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      marginTop: 6,
+      fontSize: 18,
+      color: theme.subtleText,
+      textAlign: "center",
+    },
 
-  iconTop: {
-    fontSize: 34,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: PINK,
-    textAlign: "center",
-  },
-  subtitle: {
-    marginTop: 6,
-    fontSize: 18,
-    color: "#6b6b6b",
-    textAlign: "center",
-  },
+    statsRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 16,
+      marginBottom: 14,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      paddingVertical: 16,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    statIcon: {
+      fontSize: 24,
+      marginBottom: 8,
+    },
+    statValue: {
+      fontSize: 26,
+      fontWeight: "900",
+      color: theme.thrive.title,
+    },
+    statLabel: {
+      marginTop: 6,
+      textAlign: "center",
+      color: theme.subtleText,
+      fontWeight: "700",
+    },
 
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 16,
-    marginBottom: 14,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    paddingVertical: 16,
-    alignItems: "center",
-    shadowColor: SHADOW,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  statIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: PINK,
-  },
-  statLabel: {
-    marginTop: 6,
-    textAlign: "center",
-    color: "#666",
-    fontWeight: "700",
-  },
+    bigCard: {
+      backgroundColor: theme.card,
+      borderRadius: 26,
+      padding: 18,
+      marginTop: 14,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    bigCardTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 8,
+    },
+    bodyText: {
+      fontSize: 16,
+      color: theme.text,
+      lineHeight: 22,
+      fontWeight: "600",
+    },
 
-  bigCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: 26,
-    padding: 18,
-    marginTop: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  bigCardTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 8,
-  },
-  bodyText: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 22,
-    fontWeight: "600",
-  },
-  SuggestionCard: {
-    backgroundColor: "#fff0f6",
-    borderRadius: 22,
-    padding: 18,
-    marginTop: 14,
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-  },
-  SuggestionTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 10,
-  },
-  SuggestionText: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 22,
-    marginBottom: 10,
-    fontWeight: "600",
-  },
-  footerSection: {
-    marginTop: 28,
-    marginBottom: 30,
-  },
-  
-  regenerateButton: {
-    backgroundColor: "#e5b3c7", // soft dusty pink
-    paddingVertical: 18,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  
-  regenerateButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  
-  disclaimerText: {
-    marginTop: 18,
-    fontSize: 14,
-    color: "#a8a8a8",
-    textAlign: "center",
-    fontWeight: "600",
-    paddingHorizontal: 10,
-  },
-  
+    SuggestionCard: {
+      backgroundColor: theme.thrive.panelBg,
+      borderRadius: 22,
+      padding: 18,
+      marginTop: 14,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+    },
+    SuggestionTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 10,
+    },
+    SuggestionText: {
+      fontSize: 16,
+      color: theme.text,
+      lineHeight: 22,
+      marginBottom: 10,
+      fontWeight: "600",
+    },
 
-  stateBox: {
-    marginTop: 18,
-    backgroundColor: "#fff0f6",
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-    alignItems: "center",
-  },
-  stateTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 6,
-    textAlign: "center",
-  },
-  stateText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#444",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  retryBtn: {
-    marginTop: 12,
-    backgroundColor: PINK,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 16,
-  },
-  retryBtnText: {
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: 15,
-  },
-});
+    footerSection: {
+      marginTop: 28,
+      marginBottom: 30,
+    },
+    regenerateButton: {
+      backgroundColor: theme.thrive.regenerateBtnBg, // ✅ new theme key
+      paddingVertical: 18,
+      borderRadius: 28,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    regenerateButtonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "800",
+    },
+    disclaimerText: {
+      marginTop: 18,
+      fontSize: 14,
+      color: theme.thrive.disclaimerText,
+      textAlign: "center",
+      fontWeight: "600",
+      paddingHorizontal: 10,
+    },
+
+    stateBox: {
+      marginTop: 18,
+      backgroundColor: theme.thrive.panelBg,
+      borderRadius: 22,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+      alignItems: "center",
+    },
+    stateTitle: {
+      fontSize: 18,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 6,
+      textAlign: "center",
+    },
+    stateText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.text,
+      textAlign: "center",
+      lineHeight: 20,
+    },
+    retryBtn: {
+      marginTop: 12,
+      backgroundColor: theme.thrive.title,
+      paddingVertical: 12,
+      paddingHorizontal: 18,
+      borderRadius: 16,
+    },
+    retryBtnText: {
+      color: "#fff",
+      fontWeight: "900",
+      fontSize: 15,
+    },
+  });

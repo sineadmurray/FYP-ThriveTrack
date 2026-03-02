@@ -10,12 +10,21 @@ import {
   View,
 } from "react-native";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 export default function ThriveScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
 
   const items: { title: string; desc: string; onPress?: () => void }[] = [
+    {
+      title: "AI Reflection Assistant",
+      desc: "A calm companion to help you process your thoughts.",
+      onPress: () => router.push("/thrive/aiassistant"),
+    },
     {
       title: "Mood Insights & Graphs",
       desc: "See your mood patterns over time with simple, clear visuals.",
@@ -45,36 +54,36 @@ export default function ThriveScreen() {
   ];
 
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       {/* Main content */}
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
         {/* ----- Header  ----- */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
           {/* Hamburger */}
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* ----- Hero ----- */}
         <View style={{ alignItems: "center", marginTop: 12 }}>
-          <View style={styles.iconBadge}>
+          <View style={s.iconBadge}>
             <Text style={{ fontSize: 22 }}>🌸</Text>
           </View>
-          <Text style={styles.title}>Thrive</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.title}>Thrive</Text>
+          <Text style={s.subtitle}>
             See your progress, celebrate wins, and stay inspired.
           </Text>
         </View>
@@ -107,140 +116,133 @@ function ThriveCard({
   desc: string;
   onPress: () => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, { opacity: pressed ? 0.96 : 1 }]}
+      style={({ pressed }) => [s.card, { opacity: pressed ? 0.96 : 1 }]}
     >
       <View style={{ flex: 1, paddingRight: 12 }}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardDesc}>{desc}</Text>
+        <Text style={s.cardTitle}>{title}</Text>
+        <Text style={s.cardDesc}>{desc}</Text>
       </View>
 
-      <View style={styles.chev}>
+      <View style={s.chev}>
         <Text style={{ fontSize: 18, fontWeight: "700" }}>➜</Text>
       </View>
     </Pressable>
   );
 }
 
-/* Theme – pink tones for Thrive */
-const BG = "#fff5f9"; 
-const CARD_BG = "#ffffff";
-const PINK = "#f06292"; 
-const CHEV_BG = "#ffe0ec";
-const SHADOW = "#000";
-const TEXT = "#222";
+// ✅ ThriveScreen styles (theme-based)
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  /* Header */
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    iconBadge: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: theme.card,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 2,
+      marginBottom: 8,
+    },
+    title: {
+      fontSize: 36,
+      lineHeight: 40,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      textAlign: "center",
+      marginTop: 6,
+    },
+    subtitle: {
+      textAlign: "center",
+      color: theme.subtleText,
+      fontSize: 18,
+      lineHeight: 26,
+      marginTop: 8,
+      marginBottom: 8,
+    },
 
-  /* Hero */
-  iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 36,
-    lineHeight: 40,
-    fontWeight: "800",
-    color: PINK,
-    textAlign: "center",
-    marginTop: 6,
-  },
-  subtitle: {
-    textAlign: "center",
-    color: "#616161",
-    fontSize: 18,
-    lineHeight: 26,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-
-  /* Cards */
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: "800",
-    color: PINK,
-    marginBottom: 6,
-  },
-  cardDesc: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#555",
-  },
-  chev: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: CHEV_BG,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-  },
-});
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      paddingVertical: 18,
+      paddingHorizontal: 20,
+      marginVertical: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    cardTitle: {
+      fontSize: 22,
+      lineHeight: 28,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      marginBottom: 6,
+    },
+    cardDesc: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: theme.subtleText,
+    },
+    chev: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.thrive.chevBg, // ✅ new theme key
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 10,
+    },
+  });

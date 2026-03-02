@@ -16,9 +16,13 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 
 export default function DailyReflectionScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -65,38 +69,38 @@ export default function DailyReflectionScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.root}>
+        <View style={s.root}>
           <ScrollView
-            contentContainerStyle={styles.container}
+            contentContainerStyle={s.container}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + Title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>Daily Reflection &amp;</Text>
-            <Text style={styles.title}>Positive Thoughts</Text>
-            <Text style={styles.subtitle}>
+            <Text style={s.title}>Daily Reflection &amp;</Text>
+            <Text style={s.title}>Positive Thoughts</Text>
+            <Text style={s.subtitle}>
               End your day by focusing on the wins, not the worries.
             </Text>
           </View>
@@ -132,12 +136,12 @@ export default function DailyReflectionScreen() {
 
         {/* Save button */}
         <Pressable
-          style={styles.saveButton}
+          style={s.saveButton}
           onPress={() => {
             if (!saving) handleSave();
           }}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={s.saveButtonText}>
             {saving ? "Saving..." : "Save Entry"}
           </Text>
         </Pressable>
@@ -161,17 +165,19 @@ function ReflectionCard({
   value: string;
   onChangeText: (t: string) => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.card}>
-      <Text style={styles.cardLabel}>{label}</Text>
-      <View style={styles.cardInner}>
+    <View style={s.card}>
+      <Text style={s.cardLabel}>{label}</Text>
+      <View style={s.cardInner}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#b9a5ff"
+          placeholderTextColor={theme.reflect.placeholder}
           multiline
-          style={styles.cardInput}
+          style={s.cardInput}
         />
       </View>
     </View>
@@ -179,120 +185,121 @@ function ReflectionCard({
 }
 
 /* Reflect / purple theme */
-const BG = "#fff5f7";
-const CARD_BG = "#ffffff";
-const INNER_BG = "#f6edff";
-const PURPLE = "#8f79ea";
-const BUTTON_PURPLE = "#b49cff";
-const SHADOW = "#000";
-const TEXT = "#222";
+// ✅ DailyReflectionScreen styles (theme-based)
+// Remove the old hard-coded constants (BG, CARD_BG, PURPLE, etc.)
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 8,
-    marginBottom: 12,
-  },
-  backBtn: {
-    paddingRight: 8,
-    paddingTop: 4,
-  },
-  backArrow: {
-    fontSize: 26,
-    color: TEXT,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: PURPLE,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#6f6f6f",
-    textAlign: "center",
-    marginTop: 6,
-  },
-  card: {
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  cardLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: PURPLE,
-    marginBottom: 10,
-  },
-  cardInner: {
-    backgroundColor: INNER_BG,
-    borderRadius: 18,
-    padding: 12,
-    minHeight: 90,
-    justifyContent: "flex-start",
-  },
-  cardInput: {
-    fontSize: 14,
-    color: PURPLE,
-    textAlignVertical: "top",
-  },
-  saveButton: {
-    marginTop: 18,
-    marginBottom: 24,
-    backgroundColor: BUTTON_PURPLE,
-    borderRadius: 24,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
+
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
+
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginTop: 8,
+      marginBottom: 12,
+    },
+    backBtn: {
+      paddingRight: 8,
+      paddingTop: 4,
+    },
+    backArrow: {
+      fontSize: 26,
+      color: theme.text,
+    },
+
+    title: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: theme.reflect.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      fontSize: 13,
+      color: theme.subtleText,
+      textAlign: "center",
+      marginTop: 6,
+    },
+
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      padding: 16,
+      marginBottom: 14,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
+    cardLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.reflect.title,
+      marginBottom: 10,
+    },
+    cardInner: {
+      backgroundColor: theme.reflect.inputBg,
+      borderRadius: 18,
+      padding: 12,
+      minHeight: 90,
+      justifyContent: "flex-start",
+    },
+    cardInput: {
+      fontSize: 14,
+      color: theme.text,
+      textAlignVertical: "top",
+    },
+
+    saveButton: {
+      marginTop: 18,
+      marginBottom: 24,
+      backgroundColor: theme.reflect.button,
+      borderRadius: 24,
+      paddingVertical: 14,
+      alignItems: "center",
+    },
+    saveButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "700",
+    },
+  });

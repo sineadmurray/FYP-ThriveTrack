@@ -13,8 +13,12 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 export default function EodEntryDataScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -106,36 +110,36 @@ export default function EodEntryDataScreen() {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>End of Day Reflection</Text>
-            <Text style={styles.subtitle}>
+            <Text style={s.title}>End of Day Reflection</Text>
+            <Text style={s.subtitle}>
               {niceDate} — {niceTime}
             </Text>
           </View>
@@ -145,20 +149,20 @@ export default function EodEntryDataScreen() {
 
         {/* Four cards  */}
         <View style={{ marginTop: 12 }}>
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>What went well today?</Text>
-            <View style={styles.cardInner}>
+          <View style={s.card}>
+            <Text style={s.cardLabel}>What went well today?</Text>
+            <View style={s.cardInner}>
               {isEditing ? (
                 <TextInput
                   value={wentWell}
                   onChangeText={setWentWell}
                   multiline
-                  style={styles.cardInput}
+                  style={s.cardInput}
                   placeholder="Write a moment, action, or small win that made today better."
                   placeholderTextColor="#b9a5ff"
                 />
               ) : (
-                <Text style={styles.cardText}>
+                <Text style={s.cardText}>
                   {wentWell.trim().length > 0
                     ? wentWell
                     : "No answer added for this question."}
@@ -167,20 +171,20 @@ export default function EodEntryDataScreen() {
             </View>
           </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>Something I learned</Text>
-            <View style={styles.cardInner}>
+          <View style={s.card}>
+            <Text style={s.cardLabel}>Something I learned</Text>
+            <View style={s.cardInner}>
               {isEditing ? (
                 <TextInput
                   value={learned}
                   onChangeText={setLearned}
                   multiline
-                  style={styles.cardInput}
+                  style={s.cardInput}
                   placeholder="What did today teach you about yourself, others, or life?"
                   placeholderTextColor="#b9a5ff"
                 />
               ) : (
-                <Text style={styles.cardText}>
+                <Text style={s.cardText}>
                   {learned.trim().length > 0
                     ? learned
                     : "No answer added for this question."}
@@ -189,20 +193,20 @@ export default function EodEntryDataScreen() {
             </View>
           </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>I’m proud of myself for...</Text>
-            <View style={styles.cardInner}>
+          <View style={s.card}>
+            <Text style={s.cardLabel}>I’m proud of myself for...</Text>
+            <View style={s.cardInner}>
               {isEditing ? (
                 <TextInput
                   value={proudOf}
                   onChangeText={setProudOf}
                   multiline
-                  style={styles.cardInput}
+                  style={s.cardInput}
                   placeholder="A choice, action, or habit you showed today."
                   placeholderTextColor="#b9a5ff"
                 />
               ) : (
-                <Text style={styles.cardText}>
+                <Text style={s.cardText}>
                   {proudOf.trim().length > 0
                     ? proudOf
                     : "No answer added for this question."}
@@ -211,20 +215,20 @@ export default function EodEntryDataScreen() {
             </View>
           </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>Self-care I practiced</Text>
-            <View style={styles.cardInner}>
+          <View style={s.card}>
+            <Text style={s.cardLabel}>Self-care I practiced</Text>
+            <View style={s.cardInner}>
               {isEditing ? (
                 <TextInput
                   value={selfCare}
                   onChangeText={setSelfCare}
                   multiline
-                  style={styles.cardInput}
+                  style={s.cardInput}
                   placeholder="Anything you did, small or big, that supported your well being."
                   placeholderTextColor="#b9a5ff"
                 />
               ) : (
-                <Text style={styles.cardText}>
+                <Text style={s.cardText}>
                   {selfCare.trim().length > 0
                     ? selfCare
                     : "No answer added for this question."}
@@ -237,7 +241,7 @@ export default function EodEntryDataScreen() {
         {/* Buttons */}
         <View style={{ marginTop: 40 }}>
           <Pressable
-            style={styles.primaryButton}
+            style={s.primaryButton}
             onPress={() => {
               if (isEditing) {
                 if (!saving) handleSave();
@@ -246,7 +250,7 @@ export default function EodEntryDataScreen() {
               }
             }}
           >
-            <Text style={styles.primaryButtonText}>
+            <Text style={s.primaryButtonText}>
               {isEditing
                 ? saving
                   ? "Saving..."
@@ -256,10 +260,10 @@ export default function EodEntryDataScreen() {
           </Pressable>
 
           <Pressable
-            style={styles.secondaryButton}
+            style={s.secondaryButton}
             onPress={confirmDelete}
           >
-            <Text style={styles.secondaryButtonText}>Delete Entry</Text>
+            <Text style={s.secondaryButtonText}>Delete Entry</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -285,136 +289,130 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Purple theme */
-const BG = "#fff5f7";
-const CARD_BG = "#ffffff";
-const INNER_BG = "#f6edff";
-const PURPLE = "#8f79ea";
-const BUTTON_PURPLE = "#b49cff";
-const SHADOW = "#000";
-const TEXT = "#222";
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 16,
+    },
+    backBtn: {
+      paddingRight: 8,
+    },
+    backArrow: {
+      fontSize: 26,
+      color: theme.text,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: theme.reflect.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      fontSize: 13,
+      color: theme.subtleText,
+      marginTop: 4,
+    },
 
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  backBtn: {
-    paddingRight: 8,
-  },
-  backArrow: {
-    fontSize: 26,
-    color: TEXT,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: PURPLE,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 4,
-  },
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      padding: 16,
+      marginBottom: 14,
+      shadowColor: "#000",
+      shadowOpacity: theme.mode === "dark" ? 0.25 : 0.06,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
+    cardLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.reflect.title,
+      marginBottom: 10,
+    },
+    cardInner: {
+      backgroundColor: theme.reflect.inputBg,
+      borderRadius: 18,
+      padding: 12,
+      minHeight: 80,
+      justifyContent: "flex-start",
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    cardText: {
+      fontSize: 14,
+      color: theme.reflect.title,
+    },
+    cardInput: {
+      fontSize: 14,
+      color: theme.text,
+      textAlignVertical: "top",
+    },
 
-  card: {
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  cardLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: PURPLE,
-    marginBottom: 10,
-  },
-  cardInner: {
-    backgroundColor: INNER_BG,
-    borderRadius: 18,
-    padding: 12,
-    minHeight: 80,
-    justifyContent: "flex-start",
-  },
-  cardText: {
-    fontSize: 14,
-    color: PURPLE,
-  },
-  cardInput: {
-    fontSize: 14,
-    color: PURPLE,
-    textAlignVertical: "top",
-  },
-
-  primaryButton: {
-    backgroundColor: BUTTON_PURPLE,
-    borderRadius: 24,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    backgroundColor: "#f8bbd0",
-    borderRadius: 24,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  secondaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
+    primaryButton: {
+      backgroundColor: theme.reflect.button,
+      borderRadius: 24,
+      paddingVertical: 12,
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    primaryButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    secondaryButton: {
+      backgroundColor: theme.reflect.tint,
+      borderRadius: 24,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    secondaryButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "700",
+    },
+  });

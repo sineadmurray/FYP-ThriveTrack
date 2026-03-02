@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router"; // Importing the Expo Router to navigate between screens
-import React, { useEffect, useState } from "react"; // Importing React and useState to manage component state
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -10,14 +10,12 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native"; // Importing React Native components used in the UI
+} from "react-native";
 import { API_BASE } from "../lib/api";
 import { authedFetch } from "../lib/authedFetch";
-import SideDrawer from "./components/SideDrawer"; // Importing the custom side drawer menu component
-
-export default function Home() {
-  const [drawerOpen, setDrawerOpen] = useState(false); // State to track whether the side drawer is open or closed
-  const router = useRouter();  // Router used for navigation between screens
+import SideDrawer from "./components/SideDrawer";
+import { useTheme } from "./theme/ThemeContext";
+import type { AppTheme } from "./theme/themes";
 
 type Quote = { quote_text: string; author: string };
 
@@ -36,190 +34,189 @@ type DailyPlan = {
   created_at: string;
 };
 
-const [quote, setQuote] = useState<Quote | null>(null);
-const [loadingQuote, setLoadingQuote] = useState(true);
+export default function Home() {
+  const { theme } = useTheme();
+  const s = styles(theme);
 
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const router = useRouter();
 
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [loadingQuote, setLoadingQuote] = useState(true);
 
-const [loadingStatus, setLoadingStatus] = useState(true);
-const [moodLoggedToday, setMoodLoggedToday] = useState(false);
-const [plannerDoneToday, setPlannerDoneToday] = useState(false);
-const [latestMood, setLatestMood] = useState<MoodEntry | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [moodLoggedToday, setMoodLoggedToday] = useState(false);
+  const [plannerDoneToday, setPlannerDoneToday] = useState(false);
+  const [latestMood, setLatestMood] = useState<MoodEntry | null>(null);
 
-const moodEmoji = (() => {
-  const v = latestMood?.mood_value;
-  if (v === 5) return "😁";
-  if (v === 4) return "😊";
-  if (v === 3) return "😐";
-  if (v === 2) return "😔";
-  if (v === 1) return "😞";
-  return "🙂";
-})();
+  const moodEmoji = (() => {
+    const v = latestMood?.mood_value;
+    if (v === 5) return "😁";
+    if (v === 4) return "😊";
+    if (v === 3) return "😐";
+    if (v === 2) return "😔";
+    if (v === 1) return "😞";
+    return "🙂";
+  })();
 
-const isToday = (iso: string) => {
-  const d = new Date(iso);
-  const now = new Date();
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-};
-
-useEffect(() => {
-  const loadQuote = async () => {
-    try {
-      setLoadingQuote(true);
-      const res = await fetch(`${API_BASE}/quotes/random`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: Quote = await res.json();
-      setQuote(data);
-    } catch (e) {
-      console.error("Quote fetch failed:", e);
-      setQuote(null);
-    } finally {
-      setLoadingQuote(false);
-    }
+  const isToday = (iso: string) => {
+    const d = new Date(iso);
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
   };
 
-  loadQuote();
-}, []);
-
-useFocusEffect(
-  React.useCallback(() => {
-    const loadStatus = async () => {
+  useEffect(() => {
+    const loadQuote = async () => {
       try {
-      setLoadingStatus(true);
+        setLoadingQuote(true);
+        const res = await fetch(`${API_BASE}/quotes/random`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: Quote = await res.json();
+        setQuote(data);
+      } catch (e) {
+        console.error("Quote fetch failed:", e);
+        setQuote(null);
+      } finally {
+        setLoadingQuote(false);
+      }
+    };
 
-      // mood latest
-      const moodRes = await authedFetch("/mood_entries");
-      const moodRows: MoodEntry[] = moodRes.ok ? await moodRes.json() : [];
-      const moodLatest = moodRows.length ? moodRows[0] : null;
-      setLatestMood(moodLatest);
-      setMoodLoggedToday(moodLatest ? isToday(moodLatest.created_at) : false);
+    loadQuote();
+  }, []);
 
-      // plan latest
-      const planRes = await authedFetch("/daily_plans");
-      const planRows: DailyPlan[] = planRes.ok ? await planRes.json() : [];
-      const planLatest = planRows.length ? planRows[0] : null;
-      setPlannerDoneToday(planLatest ? isToday(planLatest.created_at) : false);
-    } catch (e) {
-      console.error("Status fetch failed:", e);
-      setLatestMood(null);
-      setMoodLoggedToday(false);
-      setPlannerDoneToday(false);
-    } finally {
-      setLoadingStatus(false);
-    }
-  };
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadStatus = async () => {
+        try {
+          setLoadingStatus(true);
 
-    loadStatus();
-  }, [])
-);
+          const moodRes = await authedFetch("/mood_entries");
+          const moodRows: MoodEntry[] = moodRes.ok ? await moodRes.json() : [];
+          const moodLatest = moodRows.length ? moodRows[0] : null;
+          setLatestMood(moodLatest);
+          setMoodLoggedToday(moodLatest ? isToday(moodLatest.created_at) : false);
+
+          const planRes = await authedFetch("/daily_plans");
+          const planRows: DailyPlan[] = planRes.ok ? await planRes.json() : [];
+          const planLatest = planRows.length ? planRows[0] : null;
+          setPlannerDoneToday(planLatest ? isToday(planLatest.created_at) : false);
+        } catch (e) {
+          console.error("Status fetch failed:", e);
+          setLatestMood(null);
+          setMoodLoggedToday(false);
+          setPlannerDoneToday(false);
+        } finally {
+          setLoadingStatus(false);
+        }
+      };
+
+      loadStatus();
+    }, [])
+  );
 
   return (
-    <View style={styles.root}>
-      {/* MAIN PAGE CONTENT */}
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+    <View style={s.root}>
+      <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
 
-          <Text style={styles.appTitle}>Reflect, Grow & Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow & Thrive</Text>
 
-          {/* Hamburger */}
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Big headline */}
         <View style={{ marginTop: 12, marginBottom: 8 }}>
-          <Text style={styles.headline}>
+          <Text style={s.headline}>
             You Got This! <Text style={{ fontSize: 36 }}>🤍</Text>
           </Text>
         </View>
-        
+
         {/* Intro quote */}
-        <Text style={styles.intro}>
-          Each day is a new chance to check in, reset and grow – one thought, one
-          step, one win at a time.
+        <Text style={s.intro}>
+          Each day is a new chance to check in, reset and grow – one thought, one step, one win at a time.
         </Text>
 
         {/* Three main buttons */}
-        <View style={styles.actionsRow}>
+        <View style={s.actionsRow}>
           <ActionCard
             label="Reflect"
             emoji="🪞"
-            bg="#d8d3ff"
-            onPress={() => router.push("/reflect")} 
+            bg={theme.reflect.tint}
+            onPress={() => router.push("/reflect")}
           />
-          <ActionCard 
-          label="Grow" 
-            emoji="🌱" 
-            bg="#cdeed6" 
-            onPress={() => router.push("/grow")} 
-            />
-          <ActionCard 
-          label="Thrive" 
-          emoji="🌸" 
-          bg="#edc1cf" 
-          onPress={() => router.push("/thrive")}
+          <ActionCard
+            label="Grow"
+            emoji="🌱"
+            bg={theme.grow.tint}
+            onPress={() => router.push("/grow")}
+          />
+          <ActionCard
+            label="Thrive"
+            emoji="🌸"
+            bg={theme.thrive.tint}
+            onPress={() => router.push("/thrive")}
           />
         </View>
 
         {/* Overview + Quick actions */}
-        <View style={styles.overviewCard}>
-          <Text style={styles.overviewTitle}>Today’s Overview</Text>
+        <View style={s.overviewCard}>
+          <Text style={s.overviewTitle}>Today’s Overview</Text>
 
           {loadingStatus ? (
             <ActivityIndicator style={{ marginTop: 10 }} />
           ) : (
             <>
-              <View style={styles.pillsRow}>
-                <View style={styles.pill}>
-                  <Text style={styles.pillLabel}>Mood Today</Text>
-                  <View style={styles.pillValueRow}>
+              <View style={s.pillsRow}>
+                <View style={s.pill}>
+                  <Text style={s.pillLabel}>Mood Today</Text>
+                  <View style={s.pillValueRow}>
                     <Ionicons
                       name={moodLoggedToday ? "checkmark-circle" : "time-outline"}
                       size={18}
-                      color={moodLoggedToday ? "#19b46b" : "#9b9b9b"}
+                      color={moodLoggedToday ? theme.success : theme.muted}
                     />
-                    <Text style={[styles.pillValue, { color: moodLoggedToday ? "#19b46b" : "#9b9b9b" }]}>
+                    <Text style={[s.pillValue, { color: moodLoggedToday ? theme.success : theme.muted }]}>
                       {moodLoggedToday ? "Logged" : "To do"}
                     </Text>
                   </View>
                 </View>
 
-                <View style={styles.pill}>
-                  <Text style={styles.pillLabel}>Daily Plan</Text>
-                  <View style={styles.pillValueRow}>
+                <View style={s.pill}>
+                  <Text style={s.pillLabel}>Daily Plan</Text>
+                  <View style={s.pillValueRow}>
                     <Ionicons
                       name={plannerDoneToday ? "checkmark-circle" : "time-outline"}
                       size={18}
-                      color={plannerDoneToday ? "#19b46b" : "#9b9b9b"}
+                      color={plannerDoneToday ? theme.success : theme.muted}
                     />
-                    <Text style={[styles.pillValue, { color: plannerDoneToday ? "#19b46b" : "#9b9b9b" }]}>
+                    <Text style={[s.pillValue, { color: plannerDoneToday ? theme.success : theme.muted }]}>
                       {plannerDoneToday ? "Done" : "To do"}
                     </Text>
                   </View>
                 </View>
               </View>
 
-              <View style={styles.latestMoodBox}>
-                <Text style={styles.latestMoodLabel}>Latest mood</Text>
+              <View style={s.latestMoodBox}>
+                <Text style={s.latestMoodLabel}>Latest mood</Text>
 
-                <View style={styles.latestMoodRow}>
-                  {latestMood && (
-                    <Text style={styles.latestMoodEmoji}>{moodEmoji}</Text>
-                  )}
+                <View style={s.latestMoodRow}>
+                  {latestMood && <Text style={s.latestMoodEmoji}>{moodEmoji}</Text>}
 
-                  <Text style={styles.latestMoodText}>
+                  <Text style={s.latestMoodText}>
                     {latestMood
                       ? `${latestMood.mood}${latestMood.notes ? ` — ${latestMood.notes}` : ""}`
                       : "No mood logged yet"}
@@ -227,23 +224,23 @@ useFocusEffect(
                 </View>
               </View>
 
-              <View style={styles.quickRow}>
+              <View style={s.quickRow}>
                 <QuickButton
                   label="Log Mood"
                   icon="heart-outline"
-                  bg="#d8d3ff"
+                  bg={theme.reflect.tint}
                   onPress={() => router.push("/reflect/mood")}
                 />
                 <QuickButton
                   label="Plan Day"
                   icon="calendar-outline"
-                  bg="#cdeed6"
+                  bg={theme.grow.tint}
                   onPress={() => router.push("/grow/dailyplanner")}
                 />
                 <QuickButton
                   label="Insights"
                   icon="trending-up-outline"
-                  bg="#edc1cf"
+                  bg={theme.thrive.tint}
                   onPress={() => router.push("/thrive/moodinsights")}
                 />
               </View>
@@ -251,31 +248,21 @@ useFocusEffect(
           )}
         </View>
 
-
         {/* Daily Motivation Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Daily Motivation</Text>
+        <View style={s.card}>
+          <Text style={s.cardTitle}>Daily Motivation</Text>
 
           {loadingQuote ? (
-            <Text style={styles.cardBody}>Loading…</Text>
+            <Text style={s.cardBody}>Loading…</Text>
           ) : quote ? (
-            <>
-              <Text style={styles.cardBody}>
-                {quote.quote_text}
-              </Text>
-            </>
+            <Text style={s.cardBody}>{quote.quote_text}</Text>
           ) : (
-            <Text style={styles.cardBody}>—</Text>
+            <Text style={s.cardBody}>—</Text>
           )}
         </View>
-
       </ScrollView>
 
-      {/* Drawer LAST = renders on top */}
-      <SideDrawer
-        visible={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      />
+      <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </View>
   );
 }
@@ -288,21 +275,25 @@ type ActionCardProps = {
 };
 
 function ActionCard({ label, emoji, bg, onPress }: ActionCardProps) {
+  const { theme } = useTheme();
+  const s = styles(theme);
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
-        styles.actionCard,
+        s.actionCard,
         { backgroundColor: bg, opacity: pressed ? 0.9 : 1 },
       ]}
     >
-      <View style={styles.actionIcon}>
-        <Text style={styles.actionEmoji}>{emoji}</Text>
+      <View style={s.actionIcon}>
+        <Text style={s.actionEmoji}>{emoji}</Text>
       </View>
-      <Text style={styles.actionLabel}>{label}</Text>
+      <Text style={s.actionLabel}>{label}</Text>
     </Pressable>
   );
 }
+
 function QuickButton({
   label,
   icon,
@@ -314,236 +305,232 @@ function QuickButton({
   bg: string;
   onPress: () => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
-        styles.quickBtn,
+        s.quickBtn,
         { backgroundColor: bg, opacity: pressed ? 0.9 : 1 },
       ]}
     >
-      <Ionicons name={icon} size={18} color="#222222" />
-      <Text style={styles.quickBtnText}>{label}</Text>
+      <Ionicons name={icon} size={18} color={theme.text} />
+      <Text style={s.quickBtnText}>{label}</Text>
     </Pressable>
   );
 }
 
-/* Colors */
-const PINK = "#fdeff2";
-const TEXT = "#222222";
-const SUBTLE = "#6c6c6c";
-const ACCENT = "#ff2d95";
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: PINK,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  /* Header */
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    intro: {
+      marginTop: 8,
+      fontSize: 16,
+      lineHeight: 24,
+      color: theme.subtleText,
+      fontStyle: "italic",
+    },
 
-  /* Intro */
-  intro: {
-    marginTop: 8,
-    fontSize: 16,
-    lineHeight: 24,
-    color: SUBTLE,
-    fontStyle: "italic",
-  },
+    headline: {
+      fontSize: 42,
+      lineHeight: 48,
+      fontWeight: "800",
+      color: theme.accent,
+      textAlign: "center",
+    },
 
-  /* Headline */
-  headline: {
-    fontSize: 42,
-    lineHeight: 48,
-    fontWeight: "800",
-    color: ACCENT,
-    textAlign: "center"
-  },
+    actionsRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 14,
+      marginTop: 12,
+      marginBottom: 20,
+    },
+    actionCard: {
+      flex: 1,
+      borderRadius: 22,
+      paddingVertical: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 3,
+    },
+    actionIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: theme.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.65)",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 10,
+    },
+    actionEmoji: {
+      fontSize: 22,
+    },
+    actionLabel: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.mode === "dark" ? theme.text : "#444",
+    },
 
-  /* Buttons */
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 14,
-    marginTop: 12,
-    marginBottom: 20,
-  },
-  actionCard: {
-    flex: 1,
-    borderRadius: 22,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
-  },
-  actionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.65)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  actionEmoji: {
-    fontSize: 22,
-  },
-  actionLabel: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#444",
-  },
+    overviewCard: {
+      backgroundColor: theme.card,
+      borderRadius: 26,
+      padding: 18,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 2,
+      marginBottom: 18,
+    },
+    overviewTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: theme.text,
+    },
+    pillsRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 12,
+    },
+    pill: {
+      flex: 1,
+      backgroundColor: theme.mode === "dark" ? "#1f1f28" : "#f7f7f9",
+      borderRadius: 18,
+      padding: 12,
+    },
+    pillLabel: {
+      color: theme.muted,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    pillValueRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    pillValue: {
+      fontWeight: "800",
+      fontSize: 16,
+    },
 
-  /* Card */
-  card: {
-    backgroundColor: "white",
-    borderRadius: 24,
-    paddingVertical: 22,
-    paddingHorizontal: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#9a86ea",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  cardBody: {
-    fontSize: 18,
-    lineHeight: 26,
-    color: SUBTLE,
-    textAlign: "center",
-    fontStyle: "italic",
-  },
-  overviewCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 26,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
-    marginBottom: 18,
-  },
-  overviewTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#2b2f36",
-  },
-  pillsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-  pill: {
-    flex: 1,
-    backgroundColor: "#f7f7f9",
-    borderRadius: 18,
-    padding: 12,
-  },
-  pillLabel: {
-    color: "#8b8f9a",
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  pillValueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  pillValue: {
-    fontWeight: "800",
-    fontSize: 16,
-  },
-  latestMoodRow: {
-    flexDirection: "row",
-    alignItems: "flex-start", 
-    gap: 8,
-  },  
-  latestMoodBox: {
-    marginTop: 12,
-    backgroundColor: "#fdeff2",
-    borderRadius: 18,
-    padding: 14,
-  },
-  latestMoodLabel: {
-    color: "#8b8f9a",
-    fontWeight: "800",
-    marginBottom: 6,
-  },
-  latestMoodText: {
-    flex: 1,          
-    flexShrink: 1,    
-    flexWrap: "wrap", 
-    color: "#2b2f36",
-    fontWeight: "800",
-    fontSize: 16,
-    lineHeight: 22,   
-  },
-  latestMoodEmoji: {
-    fontSize: 20,
-    marginTop: 2, 
-  },  
-  quickRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 14,
-  },
-  quickBtn: {
-    flex: 1,
-    borderRadius: 20,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  quickBtnText: {
-    color: "#222222",
-    fontWeight: "800",
-  },
-});
+    latestMoodRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+    },
+    latestMoodBox: {
+      marginTop: 12,
+      backgroundColor: theme.mode === "dark" ? "#1b1216" : theme.background,
+      borderRadius: 18,
+      padding: 14,
+    },
+    latestMoodLabel: {
+      color: theme.muted,
+      fontWeight: "800",
+      marginBottom: 6,
+    },
+    latestMoodText: {
+      flex: 1,
+      flexShrink: 1,
+      flexWrap: "wrap",
+      color: theme.text,
+      fontWeight: "800",
+      fontSize: 16,
+      lineHeight: 22,
+    },
+    latestMoodEmoji: {
+      fontSize: 20,
+      marginTop: 2,
+    },
+
+    quickRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 14,
+    },
+    quickBtn: {
+      flex: 1,
+      borderRadius: 20,
+      paddingVertical: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    },
+    quickBtnText: {
+      color: theme.text,
+      fontWeight: "800",
+    },
+
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 24,
+      paddingVertical: 22,
+      paddingHorizontal: 18,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
+    cardTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: theme.mode === "dark" ? theme.accent : "#9a86ea",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    cardBody: {
+      fontSize: 18,
+      lineHeight: 26,
+      color: theme.subtleText,
+      textAlign: "center",
+      fontStyle: "italic",
+    },
+  });

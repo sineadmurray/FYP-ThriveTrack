@@ -13,9 +13,13 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 
 export default function MoodEntryDataScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -103,58 +107,58 @@ export default function MoodEntryDataScreen() {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={s.root}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + title row */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>{moodLabel}</Text>
-            <Text style={styles.subtitle}>
+            <Text style={s.title}>{moodLabel}</Text>
+            <Text style={s.subtitle}>
               {niceDate} — {niceTime}
             </Text>
           </View>
 
           {/* Emoji on the right */}
-          <View style={styles.emojiBubble}>
+          <View style={s.emojiBubble}>
             <Text style={{ fontSize: 26 }}>😊</Text>
           </View>
         </View>
 
         {/* Notes bubble */}
-        <View style={styles.notesBubble}>
+        <View style={s.notesBubble}>
           {isEditing ? (
             <TextInput
               value={notesValue}
               onChangeText={setNotesValue}
               multiline
               placeholder="Write your thoughts here..."
-              style={styles.notesInput}
+              style={s.notesInput}
             />
           ) : (
-            <Text style={styles.notesText}>
+            <Text style={s.notesText}>
               {notesValue.trim().length > 0
                 ? notesValue
                 : "No extra notes added for this entry."}
@@ -165,7 +169,7 @@ export default function MoodEntryDataScreen() {
         {/* Buttons */}
         <View style={{ marginTop: 60 }}>
           <Pressable
-            style={styles.primaryButton}
+            style={s.primaryButton}
             onPress={() => {
               if (isEditing) {
                 // save changes
@@ -178,16 +182,16 @@ export default function MoodEntryDataScreen() {
               }
             }}
           >
-            <Text style={styles.primaryButtonText}>
+            <Text style={s.primaryButtonText}>
               {isEditing ? (saving ? "Saving..." : "Save Changes") : "Edit Entry"}
             </Text>
           </Pressable>
 
           <Pressable
-            style={styles.secondaryButton}
+            style={s.secondaryButton}
             onPress={confirmDelete}
           >
-            <Text style={styles.secondaryButtonText}>Delete Entry</Text>
+            <Text style={s.secondaryButtonText}>Delete Entry</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -215,135 +219,131 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Pink theme */
-const BG = "#fff5f9";
-const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const BUTTON_PINK = "#f48fb1";
-const SHADOW = "#000";
-const TEXT = "#222";
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 16,
+    },
+    backBtn: {
+      paddingRight: 10,
+    },
+    backArrow: {
+      fontSize: 26,
+      color: theme.text,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: theme.thrive.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      fontSize: 13,
+      color: theme.subtleText,
+      marginTop: 4,
+    },
+    emojiBubble: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.thrive.iconCircleBg,
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 8,
+    },
 
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  backBtn: {
-    paddingRight: 10,
-  },
-  backArrow: {
-    fontSize: 26,
-    color: TEXT,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: PINK,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 4,
-  },
-  emojiBubble: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff5d9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
+    notesBubble: {
+      marginTop: 24,
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      shadowColor: "#000",
+      shadowOpacity: theme.mode === "dark" ? 0.25 : 0.1,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    notesText: {
+      fontSize: 16,
+      lineHeight: 22,
+      color: theme.text,
+    },
+    notesInput: {
+      fontSize: 16,
+      lineHeight: 22,
+      color: theme.text,
+      minHeight: 120,
+      textAlignVertical: "top",
+    },
 
-  notesBubble: {
-    marginTop: 24,
-    backgroundColor: CARD_BG,
-    borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 16,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  notesText: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
-  },
-  notesInput: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
-    minHeight: 120,
-    textAlignVertical: "top",
-  },
+    primaryButton: {
+      backgroundColor: theme.thrive.sendBtnBg,
+      borderRadius: 24,
+      paddingVertical: 12,
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    primaryButtonText: {
+      color: theme.text,
+      fontSize: 16,
+      fontWeight: "700",
+    },
 
-  primaryButton: {
-    backgroundColor: BUTTON_PINK,
-    borderRadius: 24,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    backgroundColor: "#f8bbd0",
-    borderRadius: 24,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  secondaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
+    secondaryButton: {
+      backgroundColor: theme.thrive.regenerateBtnBg,
+      borderRadius: 24,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    secondaryButtonText: {
+      color: theme.text,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+  });

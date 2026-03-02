@@ -15,6 +15,8 @@ import {
 import { LineChart, PieChart } from "react-native-gifted-charts";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 type MoodEntry = {
   id: string;
@@ -73,6 +75,8 @@ function weekdayKey(date: Date) {
 }
 
 export default function MoodInsightsScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -328,48 +332,48 @@ export default function MoodInsightsScreen() {
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={s.root}>
+      <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back */}
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
         {/* Title */}
         <View style={{ alignItems: "center", marginTop: 4 }}>
-          <Text style={styles.iconTop}>📊</Text>
-          <Text style={styles.title}>Mood Insights</Text>
-          <Text style={styles.subtitle}>Discover patterns in your wellbeing journey</Text>
+          <Text style={s.iconTop}>📊</Text>
+          <Text style={s.title}>Mood Insights</Text>
+          <Text style={s.subtitle}>Discover patterns in your wellbeing journey</Text>
         </View>
 
         {/* Range Pills */}
-        <View style={styles.pillsRow}>
-          <Pressable onPress={() => setRange("week")} style={[styles.pill, range === "week" && styles.pillActive]}>
-            <Text style={[styles.pillText, range === "week" && styles.pillTextActive]}>This Week</Text>
+        <View style={s.pillsRow}>
+          <Pressable onPress={() => setRange("week")} style={[s.pill, range === "week" && s.pillActive]}>
+            <Text style={[s.pillText, range === "week" && s.pillTextActive]}>This Week</Text>
           </Pressable>
 
-          <Pressable onPress={() => setRange("month")} style={[styles.pill, range === "month" && styles.pillActive]}>
-            <Text style={[styles.pillText, range === "month" && styles.pillTextActive]}>This Month</Text>
+          <Pressable onPress={() => setRange("month")} style={[s.pill, range === "month" && s.pillActive]}>
+            <Text style={[s.pillText, range === "month" && s.pillTextActive]}>This Month</Text>
           </Pressable>
 
-          <Pressable onPress={() => setRange("all")} style={[styles.pill, range === "all" && styles.pillActive]}>
-            <Text style={[styles.pillText, range === "all" && styles.pillTextActive]}>All Time</Text>
+          <Pressable onPress={() => setRange("all")} style={[s.pill, range === "all" && s.pillActive]}>
+            <Text style={[s.pillText, range === "all" && s.pillTextActive]}>All Time</Text>
           </Pressable>
         </View>
 
@@ -390,39 +394,39 @@ export default function MoodInsightsScreen() {
         {!loading && !error && (
           <>
             {/* Stat cards */}
-            <View style={styles.statsRow}>
-              <View style={styles.statCard}>
-                <Text style={styles.statIcon}>📈</Text>
+            <View style={s.statsRow}>
+              <View style={s.statCard}>
+                <Text style={s.statIcon}>📈</Text>
                 <View style={{ alignItems: "center" }}>
-                  <Text style={styles.statValue}>{averageMood}</Text>
-                  <Text style={styles.statSubValue}>(out of 5)</Text>
+                  <Text style={s.statValue}>{averageMood}</Text>
+                  <Text style={s.statSubValue}>(out of 5)</Text>
                 </View>
-                <Text style={styles.statLabel}>Average{"\n"}Mood</Text>
+                <Text style={s.statLabel}>Average{"\n"}Mood</Text>
               </View>
 
-              <View style={styles.statCard}>
-                <Text style={styles.statIcon}>📅</Text>
-                <Text style={styles.statValue}>{totalEntries}</Text>
-                <Text style={styles.statLabel}>Total{"\n"}Entries</Text>
+              <View style={s.statCard}>
+                <Text style={s.statIcon}>📅</Text>
+                <Text style={s.statValue}>{totalEntries}</Text>
+                <Text style={s.statLabel}>Total{"\n"}Entries</Text>
               </View>
 
-              <View style={styles.statCard}>
-                <Text style={styles.statIcon}>😊</Text>
+              <View style={s.statCard}>
+                <Text style={s.statIcon}>😊</Text>
                 <Text
-                  style={styles.statValue}
+                  style={s.statValue}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.6}
                 >
                   {mostCommonMood}
                 </Text>
-                <Text style={styles.statLabel}>Most{"\n"}Common</Text>
+                <Text style={s.statLabel}>Most{"\n"}Common</Text>
               </View>
             </View>
 
             {/* Mood Trend */}
-            <View style={styles.bigCard}>
-              <Text style={styles.bigCardTitle}>Mood Trend</Text>
+            <View style={s.bigCard}>
+              <Text style={s.bigCardTitle}>Mood Trend</Text>
 
               {totalEntries === 0 ? (
                 <Text style={{ color: "#777", marginTop: 10 }}>
@@ -451,23 +455,23 @@ export default function MoodInsightsScreen() {
 
                   // Bigger dots so logged moods stand out
                   dataPointsRadius={7}
-                  dataPointsColor={PINK}
+                  dataPointsColor={theme.thrive.title}
 
                   yAxisColor="#ddd"
                   xAxisColor="#ddd"
-                  color={PINK}
+                  color={theme.thrive.title}
                 />
               )}
 
-              <View style={styles.scaleRow}>
-                <Text style={styles.scaleText}>1 - Struggling</Text>
-                <Text style={styles.scaleText}>5 - Amazing</Text>
+              <View style={s.scaleRow}>
+                <Text style={s.scaleText}>1 - Struggling</Text>
+                <Text style={s.scaleText}>5 - Amazing</Text>
               </View>
             </View>
 
             {/* Mood Breakdown */}
-            <View style={styles.bigCard}>
-              <Text style={styles.bigCardTitle}>Mood Breakdown</Text>
+            <View style={s.bigCard}>
+              <Text style={s.bigCardTitle}>Mood Breakdown</Text>
 
               {totalEntries === 0 ? (
                 <Text style={{ color: "#777", marginTop: 10 }}>
@@ -489,12 +493,12 @@ export default function MoodInsightsScreen() {
 
                   <View style={{ marginTop: 16 }}>
                     {breakdownRows.map((r) => (
-                      <View key={r.key} style={styles.breakRow}>
-                        <View style={styles.breakLeft}>
-                          <View style={[styles.dot, { backgroundColor: r.color }]} />
-                          <Text style={styles.breakLabel}>{r.label}</Text>
+                      <View key={r.key} style={s.breakRow}>
+                        <View style={s.breakLeft}>
+                          <View style={[s.dot, { backgroundColor: r.color }]} />
+                          <Text style={s.breakLabel}>{r.label}</Text>
                         </View>
-                        <Text style={styles.breakRight}>
+                        <Text style={s.breakRight}>
                           {r.count} ({r.pct}%)
                         </Text>
                       </View>
@@ -506,10 +510,10 @@ export default function MoodInsightsScreen() {
 
             {/* Insights */}
             {insights.length > 0 && (
-              <View style={styles.insightsCard}>
-                <Text style={styles.insightsTitle}>✨ Your Insights</Text>
+              <View style={s.insightsCard}>
+                <Text style={s.insightsTitle}>✨ Your Insights</Text>
                 {insights.map((t, idx) => (
-                  <Text key={idx} style={styles.insightLine}>
+                  <Text key={idx} style={s.insightLine}>
                     {t}
                   </Text>
                 ))}
@@ -528,32 +532,32 @@ export default function MoodInsightsScreen() {
         animationType="fade"
         onRequestClose={() => setShowSupportPrompt(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>💛 A gentle check-in</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalCard}>
+            <Text style={s.modalTitle}>💛 A gentle check-in</Text>
 
-            <Text style={styles.modalText}>
+            <Text style={s.modalText}>
               {supportPrompt?.message}
             </Text>
 
             <Pressable
-              style={styles.modalPrimaryBtn}
+              style={s.modalPrimaryBtn}
               onPress={() => {
                 setShowSupportPrompt(false);
                 router.push("/thrive/resources"); 
               }}
             >
-              <Text style={styles.modalPrimaryBtnText}>View Support Resources</Text>
+              <Text style={s.modalPrimaryBtnText}>View Support Resources</Text>
             </Pressable>
 
             <Pressable
-              style={styles.modalSecondaryBtn}
+              style={s.modalSecondaryBtn}
               onPress={() => setShowSupportPrompt(false)}
             >
-              <Text style={styles.modalSecondaryBtnText}>Not right now</Text>
+              <Text style={s.modalSecondaryBtnText}>Not right now</Text>
             </Pressable>
 
-            <Text style={styles.modalFootnote}>
+            <Text style={s.modalFootnote}>
               Based on your last 5 mood check-ins (avg {supportPrompt?.avg}/5).
             </Text>
           </View>
@@ -565,301 +569,288 @@ export default function MoodInsightsScreen() {
   );
 }
 
-/* Theme */
-const BG = "#fff5f9";
-const CARD_BG = "#ffffff";
-const PINK = "#f06292";
-const TEXT = "#222";
-const SHADOW = "#000";
+// ✅ MoodInsightsScreen styles (theme-based)
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: TEXT,
-  },
+    backBtn: {
+      paddingRight: 8,
+      paddingTop: 4,
+    },
+    backArrow: {
+      fontSize: 28,
+      color: theme.thrive.title,
+      marginTop: -2,
+    },
 
-  backRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 4,
-  },
-  backArrow: {
-    fontSize: 28,
-    color: PINK,
-    marginTop: -2,
-  },
-  backBtn: {
-    paddingRight: 8,
-    paddingTop: 4,
-  },
+    iconTop: {
+      fontSize: 34,
+      marginBottom: 6,
+    },
+    title: {
+      fontSize: 42,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      textAlign: "center",
+    },
+    subtitle: {
+      marginTop: 6,
+      fontSize: 18,
+      color: theme.subtleText,
+      textAlign: "center",
+    },
 
-  iconTop: {
-    fontSize: 34,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: PINK,
-    textAlign: "center",
-  },
-  subtitle: {
-    marginTop: 6,
-    fontSize: 18,
-    color: "#6b6b6b",
-    textAlign: "center",
-  },
+    pillsRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 10,
+      marginTop: 18,
+      marginBottom: 14,
+    },
+    pill: {
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderRadius: 20,
+      backgroundColor: theme.thrive.pillBg,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+    },
+    pillActive: {
+      backgroundColor: theme.thrive.title,
+      borderColor: theme.thrive.title,
+    },
+    pillText: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: theme.thrive.pillText,
+    },
+    pillTextActive: {
+      color: "#fff",
+    },
 
-  pillsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 10,
-    marginTop: 18,
-    marginBottom: 14,
-  },
-  pill: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: "#ffe0ec",
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-  },
-  pillActive: {
-    backgroundColor: PINK,
-    borderColor: PINK,
-  },
-  pillText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#b56b87",
-  },
-  pillTextActive: {
-    color: "#fff",
-  },
+    statsRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 8,
+      marginBottom: 14,
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      paddingVertical: 16,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    statIcon: {
+      fontSize: 24,
+      marginBottom: 8,
+    },
+    statValue: {
+      fontSize: 26,
+      fontWeight: "900",
+      color: theme.thrive.title,
+    },
+    statSubValue: {
+      marginTop: 2,
+      fontSize: 12,
+      fontWeight: "800",
+      color: theme.subtleText,
+    },
+    statLabel: {
+      marginTop: 6,
+      textAlign: "center",
+      color: theme.subtleText,
+      fontWeight: "700",
+    },
 
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-    marginBottom: 14,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    paddingVertical: 16,
-    alignItems: "center",
-    shadowColor: SHADOW,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  statIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: PINK,
-  },
-  statSubValue: {
-    marginTop: 2,
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#777",
-  },
-  statLabel: {
-    marginTop: 6,
-    textAlign: "center",
-    color: "#666",
-    fontWeight: "700",
-  },
+    bigCard: {
+      backgroundColor: theme.card,
+      borderRadius: 26,
+      padding: 18,
+      marginTop: 14,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+    },
+    bigCardTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 8,
+    },
 
-  bigCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: 26,
-    padding: 18,
-    marginTop: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  bigCardTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 8,
-  },
+    scaleRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 6,
+    },
+    scaleText: {
+      color: theme.subtleText,
+      fontWeight: "600",
+    },
 
-  scaleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 6,
-  },
-  scaleText: {
-    color: "#777",
-    fontWeight: "600",
-  },
+    breakRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 8,
+    },
+    breakLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    dot: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+    },
+    breakLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.subtleText,
+    },
+    breakRight: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: theme.thrive.title,
+    },
 
-  breakRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-  },
-  breakLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  dot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-  },
-  breakLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#666",
-  },
-  breakRight: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: PINK,
-  },
+    insightsCard: {
+      backgroundColor: theme.thrive.panelBg,
+      borderRadius: 22,
+      padding: 18,
+      marginTop: 14,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+    },
+    insightsTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 10,
+    },
+    insightLine: {
+      fontSize: 16,
+      color: theme.text,
+      lineHeight: 22,
+      marginBottom: 10,
+      fontWeight: "600",
+    },
 
-  insightsCard: {
-    backgroundColor: "#fff0f6",
-    borderRadius: 22,
-    padding: 18,
-    marginTop: 14,
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-  },
-  insightsTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 10,
-  },
-  insightLine: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 22,
-    marginBottom: 10,
-    fontWeight: "600",
-  },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 380,
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: PINK,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  modalText: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 22,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  modalPrimaryBtn: {
-    marginTop: 14,
-    backgroundColor: PINK,
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  modalPrimaryBtnText: {
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: 16,
-  },
-  modalSecondaryBtn: {
-    marginTop: 10,
-    paddingVertical: 10,
-    borderRadius: 16,
-    alignItems: "center",
-    backgroundColor: "#ffe0ec",
-    borderWidth: 1,
-    borderColor: "#ffd0e2",
-  },
-  modalSecondaryBtnText: {
-    color: "#b56b87",
-    fontWeight: "900",
-    fontSize: 15,
-  },
-  modalFootnote: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#777",
-    textAlign: "center",
-    fontWeight: "700",
-  },
-
-});
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.35)",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 20,
+    },
+    modalCard: {
+      width: "100%",
+      maxWidth: 380,
+      backgroundColor: theme.card,
+      borderRadius: 24,
+      padding: 18,
+      shadowColor: "#000",
+      shadowOpacity: 0.18,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: theme.thrive.title,
+      marginBottom: 8,
+      textAlign: "center",
+    },
+    modalText: {
+      fontSize: 16,
+      color: theme.text,
+      lineHeight: 22,
+      fontWeight: "600",
+      textAlign: "center",
+    },
+    modalPrimaryBtn: {
+      marginTop: 14,
+      backgroundColor: theme.thrive.title,
+      paddingVertical: 12,
+      borderRadius: 16,
+      alignItems: "center",
+    },
+    modalPrimaryBtnText: {
+      color: "#fff",
+      fontWeight: "900",
+      fontSize: 16,
+    },
+    modalSecondaryBtn: {
+      marginTop: 10,
+      paddingVertical: 10,
+      borderRadius: 16,
+      alignItems: "center",
+      backgroundColor: theme.thrive.pillBg,
+      borderWidth: 1,
+      borderColor: theme.thrive.pillBorder,
+    },
+    modalSecondaryBtnText: {
+      color: theme.thrive.pillText,
+      fontWeight: "900",
+      fontSize: 15,
+    },
+    modalFootnote: {
+      marginTop: 10,
+      fontSize: 12,
+      color: theme.subtleText,
+      textAlign: "center",
+      fontWeight: "700",
+    },
+  });

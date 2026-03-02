@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import SideDrawer from "../components/SideDrawer";
+import { useTheme } from "../theme/ThemeContext";
+import type { AppTheme } from "../theme/themes";
 
 type Params = {
   id?: string;
@@ -32,6 +34,8 @@ type Params = {
 };
 
 export default function WhereIAmEntryDataScreen() {
+  const { theme } = useTheme();
+  const s = styles(theme);
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -122,34 +126,34 @@ export default function WhereIAmEntryDataScreen() {
   }
 
   return (
-    <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={s.root}>
+      <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
-            style={styles.logo}
+            style={s.logo}
             resizeMode="contain"
           />
-          <Text style={styles.appTitle}>Reflect, Grow &amp; Thrive</Text>
+          <Text style={s.appTitle}>Reflect, Grow &amp; Thrive</Text>
 
-          <Pressable style={styles.menu} onPress={() => setDrawerOpen(true)}>
-            <View style={styles.menuLine} />
-            <View style={[styles.menuLine, { width: 18 }]} />
-            <View style={[styles.menuLine, { width: 22 }]} />
+          <Pressable style={s.menu} onPress={() => setDrawerOpen(true)}>
+            <View style={s.menuLine} />
+            <View style={[s.menuLine, { width: 18 }]} />
+            <View style={[s.menuLine, { width: 22 }]} />
           </Pressable>
         </View>
 
         {/* Back + title */}
-        <View style={styles.titleRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+        <View style={s.titleRow}>
+          <Pressable onPress={() => router.back()} style={s.backBtn}>
+            <Text style={s.backArrow}>‹</Text>
           </Pressable>
 
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={styles.title}>Where I Am Now /</Text>
-            <Text style={styles.title}>Where I Want to Be</Text>
-            <Text style={styles.subtitle}>
+            <Text style={s.title}>Where I Am Now /</Text>
+            <Text style={s.title}>Where I Want to Be</Text>
+            <Text style={s.subtitle}>
               {niceDate} {niceTime ? `— ${niceTime}` : ""}
             </Text>
           </View>
@@ -201,7 +205,7 @@ export default function WhereIAmEntryDataScreen() {
         {/* Buttons */}
         <View style={{ marginTop: 24 }}>
           <Pressable
-            style={styles.primaryButton}
+            style={s.primaryButton}
             onPress={() => {
               if (isEditing) {
                 if (!saving) handleSave();
@@ -210,13 +214,13 @@ export default function WhereIAmEntryDataScreen() {
               }
             }}
           >
-            <Text style={styles.primaryButtonText}>
+            <Text style={s.primaryButtonText}>
               {isEditing ? (saving ? "Saving..." : "Save Changes") : "Edit Entry"}
             </Text>
           </Pressable>
 
-          <Pressable style={styles.secondaryButton} onPress={confirmDelete}>
-            <Text style={styles.secondaryButtonText}>Delete Entry</Text>
+          <Pressable style={s.secondaryButton} onPress={confirmDelete}>
+            <Text style={s.secondaryButtonText}>Delete Entry</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -243,43 +247,45 @@ function DualSectionCard({
   onChangeNow: (t: string) => void;
   onChangeWant: (t: string) => void;
 }) {
+  const { theme } = useTheme();
+  const s = styles(theme);
   return (
-    <View style={styles.card}>
-      <Text style={styles.sectionTitle}>
-        {icon} <Text style={styles.sectionTitleText}>{title}</Text>
+    <View style={s.card}>
+      <Text style={s.sectionTitle}>
+        {icon} <Text style={s.sectionTitleText}>{title}</Text>
       </Text>
 
-      <Text style={styles.promptLabel}>Where I Am Now</Text>
-      <View style={styles.cardInner}>
+      <Text style={s.promptLabel}>Where I Am Now</Text>
+      <View style={s.cardInner}>
         {isEditing ? (
           <TextInput
             value={nowValue}
             onChangeText={onChangeNow}
             placeholder="Describe your current state..."
-            placeholderTextColor={MINT_PLACEHOLDER}
+            placeholderTextColor={theme.grow.placeholder}
             multiline
-            style={styles.cardInput}
+            style={s.cardInput}
           />
         ) : (
-          <Text style={styles.cardText}>
+          <Text style={s.cardText}>
             {nowValue.trim().length > 0 ? nowValue : "No answer added for this question."}
           </Text>
         )}
       </View>
 
-      <Text style={[styles.promptLabel, { marginTop: 14 }]}>Where I Want To Be</Text>
-      <View style={styles.cardInner}>
+      <Text style={[s.promptLabel, { marginTop: 14 }]}>Where I Want To Be</Text>
+      <View style={s.cardInner}>
         {isEditing ? (
           <TextInput
             value={wantValue}
             onChangeText={onChangeWant}
             placeholder="Describe where you’d like to grow..."
-            placeholderTextColor={MINT_PLACEHOLDER}
+            placeholderTextColor={theme.grow.placeholder}
             multiline
-            style={styles.cardInput}
+            style={s.cardInput}
           />
         ) : (
-          <Text style={styles.cardText}>
+          <Text style={s.cardText}>
             {wantValue.trim().length > 0 ? wantValue : "No answer added for this question."}
           </Text>
         )}
@@ -304,161 +310,152 @@ function formatDate(raw?: string) {
   return { niceDate, niceTime };
 }
 
-/* Mint theme */
-const BG = "#fbf6f8";
-const TEXT = "#222";
-const MINT = "#9fe7c0";
-const CARD_BG = "#ffffff";
-const INPUT_BG = "#e8fbf1";
-const MINT_PLACEHOLDER = "#b7e8d0";
-const SHADOW = "#000";
+const styles = (theme: AppTheme) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingTop: Platform.OS === "android" ? 35 : 55,
+    },
+    container: {
+      paddingHorizontal: 18,
+      paddingBottom: 36,
+    },
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-    paddingTop: Platform.OS === "android" ? 35 : 55,
-  },
-  container: {
-    paddingHorizontal: 18,
-    paddingBottom: 36,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    logo: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    appTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 19,
+      fontWeight: "600",
+      color: theme.text,
+    },
+    menu: {
+      width: 28,
+      alignItems: "flex-end",
+      gap: 5,
+      marginLeft: 12,
+    },
+    menuLine: {
+      height: 3,
+      width: 24,
+      borderRadius: 3,
+      backgroundColor: theme.text,
+      opacity: 0.75,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  appTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 19,
-    fontWeight: "600",
-    color: TEXT,
-  },
-  menu: {
-    width: 28,
-    alignItems: "flex-end",
-    gap: 5,
-    marginLeft: 12,
-  },
-  menuLine: {
-    height: 3,
-    width: 24,
-    borderRadius: 3,
-    backgroundColor: "#444",
-  },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginTop: 6,
+      marginBottom: 10,
+    },
+    backBtn: {
+      paddingRight: 10,
+      paddingTop: 2,
+      width: 28,
+    },
+    backArrow: {
+      fontSize: 28,
+      color: theme.subtleText,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "900",
+      color: theme.grow.title,
+      textAlign: "center",
+      lineHeight: 26,
+    },
+    subtitle: {
+      fontSize: 13,
+      color: theme.subtleText,
+      textAlign: "center",
+      marginTop: 6,
+    },
 
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 6,
-    marginBottom: 10,
-  },
-  backBtn: {
-    paddingRight: 10,
-    paddingTop: 2,
-    width: 28,
-  },
-  backArrow: {
-    fontSize: 28,
-    color: "#666",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: MINT,
-    textAlign: "center",
-    lineHeight: 26,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#777",
-    textAlign: "center",
-    marginTop: 6,
-  },
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: 22,
+      padding: 16,
+      marginTop: 14,
+      shadowColor: "#000",
+      shadowOpacity: theme.mode === "dark" ? 0.25 : 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 5 },
+      elevation: 2,
+    },
 
-  card: {
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    padding: 16,
-    marginTop: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 2,
-  },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "900",
+      color: theme.grow.title,
+      marginBottom: 10,
+    },
+    sectionTitleText: { color: theme.grow.title },
 
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: MINT,
-    marginBottom: 10,
-  },
-  sectionTitleText: {
-    color: MINT,
-  },
+    promptLabel: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: theme.text,
+      marginBottom: 8,
+    },
 
-  promptLabel: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#111",
-    marginBottom: 8,
-  },
+    cardInner: {
+      backgroundColor: theme.grow.inputBg,
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      minHeight: 88,
+      borderWidth: 1,
+      borderColor: theme.grow.inputBorder,
+      justifyContent: "flex-start",
+    },
+    cardText: {
+      fontSize: 14,
+      color: theme.grow.inputText,
+    },
+    cardInput: {
+      fontSize: 14,
+      color: theme.grow.inputText,
+      textAlignVertical: "top",
+    },
 
-  cardInner: {
-    backgroundColor: INPUT_BG,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    minHeight: 88,
-    borderWidth: 1,
-    borderColor: "#c9f3df",
-    justifyContent: "flex-start",
-  },
-  cardText: {
-    fontSize: 14,
-    color: "#2b6a54",
-  },
-  cardInput: {
-    fontSize: 14,
-    color: "#2b6a54",
-    textAlignVertical: "top",
-  },
-
-  primaryButton: {
-    backgroundColor: MINT,
-    borderRadius: 24,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginBottom: 14,
-    shadowColor: SHADOW,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  secondaryButton: {
-    backgroundColor: "#bfeedd",
-    borderRadius: 24,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  secondaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-});
+    primaryButton: {
+      backgroundColor: theme.grow.button,
+      borderRadius: 24,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginBottom: 14,
+      shadowColor: "#000",
+      shadowOpacity: theme.mode === "dark" ? 0.25 : 0.06,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
+    primaryButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "800",
+    },
+    secondaryButton: {
+      backgroundColor: theme.grow.tint,
+      borderRadius: 24,
+      paddingVertical: 14,
+      alignItems: "center",
+    },
+    secondaryButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "800",
+    },
+  });
