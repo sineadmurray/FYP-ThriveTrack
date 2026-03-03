@@ -1652,18 +1652,18 @@ app.delete("/me", requireAuth, async (req, res) => {
     const userId = req.user?.id || req.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorised" });
 
-    // 1) Delete user-owned rows from YOUR tables (adjust table names)
-    // Example:
+    // Delete user-owned content 
     await pool.query("DELETE FROM mood_entries WHERE user_id = $1", [userId]);
-    await pool.query("DELETE FROM daily_reflections WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM daily_plans WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM end_of_day_reflections WHERE user_id = $1", [userId]);
     await pool.query("DELETE FROM gratitude_entries WHERE user_id = $1", [userId]);
-    await pool.query("DELETE FROM trap_and_track_entries WHERE user_id = $1", [userId]);
-    await pool.query("DELETE FROM outside_thinking_entries WHERE user_id = $1", [userId]);
-    await pool.query("DELETE FROM weekly_reflections WHERE user_id = $1", [userId]);
     await pool.query("DELETE FROM long_term_visions WHERE user_id = $1", [userId]);
-    await pool.query("DELETE FROM daily_planners WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM weekly_reflections WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM where_i_am_reflections WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM trap_and_track WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM outside_in_actions WHERE user_id = $1", [userId]);
 
-    // 2) Delete user from Supabase Auth (needs service role client)
+    // Delete auth user last
     const { error } = await supabaseServer.auth.admin.deleteUser(userId);
     if (error) return res.status(500).json({ error: error.message });
 
@@ -1673,7 +1673,6 @@ app.delete("/me", requireAuth, async (req, res) => {
     return res.status(500).json({ error: "Failed to delete account" });
   }
 });
-
 const port = process.env.PORT || 4000;
 
 // bind to all interfaces so phone can reach it over Wi-Fi
