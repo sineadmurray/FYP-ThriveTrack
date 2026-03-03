@@ -1647,6 +1647,32 @@ app.post("/ai/reflection", requireAuth, async (req, res) => {
 });
 
 
+app.delete("/me", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id; // <-- depends on your requireAuth; adjust if yours uses req.userId etc.
+
+    // 1) Delete user-owned rows from YOUR tables (adjust table names)
+    // Example:
+    await pool.query("DELETE FROM mood_entries WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM daily_reflections WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM gratitude_entries WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM trap_and_track_entries WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM outside_thinking_entries WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM weekly_reflections WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM long_term_visions WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM daily_planners WHERE user_id = $1", [userId]);
+
+    // 2) Delete user from Supabase Auth (needs service role client)
+    const { error } = await supabaseServer.auth.admin.deleteUser(userId);
+    if (error) return res.status(500).json({ error: error.message });
+
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
 const port = process.env.PORT || 4000;
 
 // bind to all interfaces so phone can reach it over Wi-Fi
