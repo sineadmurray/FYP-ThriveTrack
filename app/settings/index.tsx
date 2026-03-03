@@ -13,15 +13,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { authedFetch } from "../../lib/authedFetch";
 import { supabase } from "../../lib/supabase";
-import { useTheme } from "../../theme/ThemeContext";
-import type { AppTheme } from "../../theme/themes";
-import SideDrawer from "../components/SideDrawer";
-
-// ✅ NEW imports (adjust paths to where you create the files)
 import { cancelScheduled, ensureNotificationPermission, scheduleDailyReminder } from "../../notifications/notifications";
 import type { ReminderKey, ReminderSettings } from "../../notifications/reminderSettings";
 import { loadReminders, saveReminders } from "../../notifications/reminderSettings";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
+import SideDrawer from "../components/SideDrawer";
 
 const DANGER = "#E24A4A";
 
@@ -81,22 +80,43 @@ export default function SettingsScreen() {
     setEmail(user?.email ?? "—");
   }
 
-  function confirmDelete() {
-    Alert.alert(
-      "Delete account & data?",
-      "This will permanently remove your account and all saved entries. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert("Not implemented", "This will be implemented later.");
-          },
-        },
-      ]
-    );
+  async function deleteAccountAndData() {
+  try {
+    // Cancel scheduled notifications first (nice + avoids “ghost reminders”)
+    if (reminders) {
+      await cancelScheduled(reminders.dailyPlan.notificationId);
+      await cancelScheduled(reminders.mood.notificationId);
+      await cancelScheduled(reminders.reflection.notificationId);
+    }
+
+    // Call backend to delete DB rows + Supabase user
+    const res = await authedFetch("/me", { method: "DELETE" });
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || "Delete failed");
+    }
+
+    // Sign out locally
+    await supabase.auth.signOut();
+
+    // Navigate to your auth screen
+    // Adjust this path to whatever your app uses for login.
+    router.replace("/"); // e.g. "/login" or "/(auth)/login"
+  } catch (e: any) {
+    Alert.alert("Delete failed", e?.message ?? "Something went wrong.");
   }
+}
+
+function confirmDelete() {
+  Alert.alert(
+    "Delete account & data?",
+    "This will permanently remove your account and all saved entries. This cannot be undone.",
+    [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: deleteAccountAndData },
+    ]
+  );
+}
 
   async function handleLogout() {
     Alert.alert("Log out?", "You will need to sign in again to access your account.", [
@@ -399,7 +419,7 @@ export default function SettingsScreen() {
         {/* PRIVACY */}
         <Text style={s.sectionLabel}>PRIVACY &amp; DATA</Text>
         <View style={s.card}>
-          <Pressable onPress={() => {}} style={({ pressed }) => [s.rowAction, pressed && s.pressed]}>
+          <Pressable onPress={() => {router.push("/settings/privacy")}} style={({ pressed }) => [s.rowAction, pressed && s.pressed]}>
             <Text style={s.actionText}>View Privacy Policy</Text>
             <Text style={s.chevron}>›</Text>
           </Pressable>
