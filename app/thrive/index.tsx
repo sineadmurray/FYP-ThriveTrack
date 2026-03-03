@@ -44,7 +44,7 @@ export default function ThriveScreen() {
     {
       title: "Export & Share",
       desc: "Export or share your progress if you’d like extra support.",
-     onPress: () => router.push("/thrive/export"),
+     onPress: () => router.push("/thrive/exportscreen"),
     },
     {
       title: "Resources Hub",

@@ -11,13 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "../../../lib/supabase";
-import { useTheme } from "../../../theme/ThemeContext";
-import type { AppTheme } from "../../../theme/themes";
-import SideDrawer from "../../components/SideDrawer";
-import type { ExportCategory, TimePeriod } from "./exportOptions";
-import { GROW_OPTIONS, REFLECT_OPTIONS } from "./exportOptions";
-import { generateAndSharePdf } from "./pdfExport";
+import type { ExportCategory, TimePeriod } from "../../export/exportOptions";
+import { GROW_OPTIONS, REFLECT_OPTIONS } from "../../export/exportOptions";
+import { generateAndSharePdf } from "../../export/pdfExport";
+import { supabase } from "../../lib/supabase";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
+import SideDrawer from "../components/SideDrawer";
 
 /* -------------------- */
 /* Small UI components */
@@ -154,7 +154,7 @@ export default function ExportShareScreen() {
         {/* Header (same layout as Resources screen) */}
         <View style={s.header}>
           <Image
-            source={require("../../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrack Logo.png")}
             style={s.logo}
             resizeMode="contain"
           />

@@ -3,8 +3,8 @@ import * as Sharing from "expo-sharing";
 import type { ExportCategory, TimePeriod } from "./exportOptions";
 import { getLogoBase64 } from "./logoBase64";
 
-import { API_BASE } from "../../../lib/api";
-import { supabase } from "../../../lib/supabase";
+import { API_BASE } from "../lib/api";
+import { supabase } from "../lib/supabase";
 
 /* ---------------- Timeout + Authed HTTP ---------------- */
 
