@@ -42,6 +42,16 @@ async function requireAuth(req, res, next) {
   }
 }
 
+function parseFromDate(req) {
+  const from = req.query.from;
+  if (!from) return null;
+
+  const d = new Date(from);
+  if (Number.isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
 // CORS + JSON
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'] })); // Allow all origins (mobile phone, Expo tunnel, web etc.)
 app.use(express.json()); // Parse incoming JSON in request bodies
@@ -244,10 +254,19 @@ app.post("/mood_entries", requireAuth, async (req, res) => {
 app.get("/mood_entries", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM mood_entries WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = "SELECT * FROM mood_entries WHERE user_id=$1";
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += " AND created_at >= $2";
+    }
+
+    sql += " ORDER BY created_at DESC";
+
+    const { rows } = await pool.query(sql, params);
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -330,10 +349,24 @@ app.post("/end_of_day_reflections", requireAuth, async (req, res) => {
 app.get("/end_of_day_reflections", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM end_of_day_reflections WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM end_of_day_reflections
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -429,10 +462,24 @@ app.post("/trap_and_track", requireAuth, async (req, res) => {
 app.get("/trap_and_track", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM trap_and_track WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM trap_and_track
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -538,10 +585,24 @@ app.post("/gratitude_entries", requireAuth, async (req, res) => {
 app.get("/gratitude_entries", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM gratitude_entries WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM gratitude_entries
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -679,10 +740,24 @@ app.post("/outside_in_actions", requireAuth, async (req, res) => {
 app.get("/outside_in_actions", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM outside_in_actions WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM outside_in_actions
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -781,10 +856,24 @@ app.post("/where_i_am_reflections", requireAuth, async (req, res) => {
 app.get("/where_i_am_reflections", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM where_i_am_reflections WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM where_i_am_reflections
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -901,10 +990,24 @@ app.post("/weekly_reflections", requireAuth, async (req, res) => {
 app.get("/weekly_reflections", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM weekly_reflections WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM weekly_reflections
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -1018,10 +1121,24 @@ app.post("/daily_plans", requireAuth, async (req, res) => {
 app.get("/daily_plans", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM daily_plans WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM daily_plans
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -1124,10 +1241,24 @@ app.post("/long_term_visions", requireAuth, async (req, res) => {
 app.get("/long_term_visions", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { rows } = await pool.query(
-      "SELECT * FROM long_term_visions WHERE user_id=$1 ORDER BY created_at DESC",
-      [userId]
-    );
+    const fromISO = parseFromDate(req);
+
+    const params = [userId];
+    let sql = `
+      SELECT *
+      FROM long_term_visions
+      WHERE user_id = $1
+    `;
+
+    if (fromISO) {
+      params.push(fromISO);
+      sql += ` AND created_at >= $2`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    const { rows } = await pool.query(sql, params);
+
     res.json(rows);
   } catch (e) {
     console.error(e);
