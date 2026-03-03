@@ -1,5 +1,6 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
@@ -13,19 +14,29 @@ import {
   View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
 
-// Theme (same vibe as your other screens)
-const BG = "#fff5f7";
-const CARD_BG = "#ffffff";
-const TEXT = "#222";
-const SUBTLE = "#8f8f9a";
-const DIVIDER = "#ececf0";
+// ✅ NEW imports (adjust paths to where you create the files)
+import { cancelScheduled, ensureNotificationPermission, scheduleDailyReminder } from "../../notifications/notifications";
+import type { ReminderKey, ReminderSettings } from "../../notifications/reminderSettings";
+import { loadReminders, saveReminders } from "../../notifications/reminderSettings";
+
 const DANGER = "#E24A4A";
-const SHADOW = "#000";
-const PINK = "#EB4C87";
+
+const LABELS: Record<ReminderKey, { title: string; subtitle: string }> = {
+  dailyPlan: { title: "Daily plan reminder", subtitle: "Morning nudge to set your priorities" },
+  mood: { title: "Mood reminder", subtitle: "Gentle check-in to log how you feel" },
+  reflection: { title: "Reflection reminder", subtitle: "Evening prompt for reflection" },
+};
+
+function formatTime(hour: number, minute: number) {
+  const d = new Date();
+  d.setHours(hour);
+  d.setMinutes(minute);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -42,9 +53,19 @@ export default function SettingsScreen() {
   const [nameDraft, setNameDraft] = useState("");
   const [savingName, setSavingName] = useState(false);
 
+  // ✅ Notification settings state
+  const [reminders, setReminders] = useState<ReminderSettings | null>(null);
+  const [pickerKey, setPickerKey] = useState<ReminderKey | null>(null);
+
   useEffect(() => {
     refreshUser();
+    loadNotificationPrefs();
   }, []);
+
+  async function loadNotificationPrefs() {
+    const loaded = await loadReminders();
+    setReminders(loaded);
+  }
 
   async function refreshUser() {
     const { data, error } = await supabase.auth.getUser();
@@ -113,6 +134,83 @@ export default function SettingsScreen() {
     await refreshUser();
     Alert.alert("Updated", "Your display name has been updated.");
   }
+
+  // ---------------------------
+  // ✅ Notification logic
+  // ---------------------------
+  async function persist(next: ReminderSettings) {
+    setReminders(next);
+    await saveReminders(next);
+  }
+
+  async function setReminderEnabled(key: ReminderKey, enabled: boolean) {
+    if (!reminders) return;
+
+    if (enabled) {
+      const ok = await ensureNotificationPermission();
+      if (!ok) {
+        Alert.alert(
+          "Notifications disabled",
+          "Enable notifications in your phone settings to use reminders."
+        );
+        return;
+      }
+
+      // Cancel existing schedule if any (defensive)
+      await cancelScheduled(reminders[key].notificationId);
+
+      const id = await scheduleDailyReminder(key, reminders[key].hour, reminders[key].minute);
+
+      const next: ReminderSettings = {
+        ...reminders,
+        [key]: { ...reminders[key], enabled: true, notificationId: id },
+      };
+      await persist(next);
+      return;
+    }
+
+    // disabling
+    await cancelScheduled(reminders[key].notificationId);
+
+    const next: ReminderSettings = {
+      ...reminders,
+      [key]: { ...reminders[key], enabled: false, notificationId: null },
+    };
+    await persist(next);
+  }
+
+  async function setReminderTime(key: ReminderKey, hour: number, minute: number) {
+    if (!reminders) return;
+
+    const prev = reminders[key];
+
+    // If enabled, reschedule immediately
+    if (prev.enabled) {
+      await cancelScheduled(prev.notificationId);
+      const id = await scheduleDailyReminder(key, hour, minute);
+
+      const next: ReminderSettings = {
+        ...reminders,
+        [key]: { ...prev, hour, minute, notificationId: id },
+      };
+      await persist(next);
+    } else {
+      const next: ReminderSettings = {
+        ...reminders,
+        [key]: { ...prev, hour, minute },
+      };
+      await persist(next);
+    }
+  }
+
+  const pickerValue = useMemo(() => {
+    const d = new Date();
+    if (!reminders || !pickerKey) return d;
+    d.setHours(reminders[pickerKey].hour);
+    d.setMinutes(reminders[pickerKey].minute);
+    d.setSeconds(0);
+    return d;
+  }, [reminders, pickerKey]);
 
   return (
     <View style={s.root}>
@@ -215,17 +313,74 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* NOTIFICATIONS */}
+        {/* ✅ NOTIFICATIONS */}
         <Text style={s.sectionLabel}>NOTIFICATIONS &amp; REMINDERS</Text>
-        <View style={s.cardSingle}>
-          <Pressable onPress={() => {}} style={({ pressed }) => [s.rowAction, pressed && s.pressed]}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.actionText}>Manage Notifications</Text>
-              <Text style={s.comingSoon}>Coming soon</Text>
+        <View style={s.card}>
+          {reminders ? (
+            (["dailyPlan", "mood", "reflection"] as ReminderKey[]).map((key, idx, arr) => {
+              const item = reminders[key];
+
+              return (
+                <View key={key}>
+                  <View style={s.reminderRow}>
+                    <View style={{ flex: 1, paddingRight: 10 }}>
+                      <Text style={s.reminderTitle}>{LABELS[key].title}</Text>
+                      <Text style={s.reminderSub}>{LABELS[key].subtitle}</Text>
+
+                      <Pressable
+                        onPress={() => setPickerKey(key)}
+                        style={({ pressed }) => [
+                          s.timePill,
+                          pressed && s.pressed,
+                          !item.enabled && { opacity: 0.75 },
+                        ]}
+                        hitSlop={6}
+                      >
+                        <Text style={s.timePillText}>
+                          Time: {formatTime(item.hour, item.minute)}
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    <Switch value={item.enabled} onValueChange={(v) => setReminderEnabled(key, v)} />
+                  </View>
+
+                  {idx !== arr.length - 1 && <View style={s.divider} />}
+                </View>
+              );
+            })
+          ) : (
+            <View style={s.rowBlock}>
+              <Text style={s.comingSoon}>Loading reminders…</Text>
             </View>
-            <Text style={s.chevron}>›</Text>
-          </Pressable>
+          )}
         </View>
+
+        {/* Time Picker */}
+        {pickerKey && reminders && (
+          <View style={{ marginTop: 10 }}>
+            <DateTimePicker
+              value={pickerValue}
+              mode="time"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={(event, date) => {
+                if (Platform.OS !== "ios") setPickerKey(null); // Android closes on select/cancel
+                if (!date) return;
+
+                setReminderTime(pickerKey, date.getHours(), date.getMinutes());
+              }}
+            />
+
+            {Platform.OS === "ios" && (
+              <Pressable
+                onPress={() => setPickerKey(null)}
+                style={({ pressed }) => [s.doneBtn, pressed && s.pressed]}
+              >
+                <Text style={s.doneText}>Done</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
 
         {/* THEME */}
         <Text style={s.sectionLabel}>THEME &amp; PERSONALISATION</Text>
@@ -234,15 +389,10 @@ export default function SettingsScreen() {
           <View style={s.rowAction}>
             <View style={{ flex: 1 }}>
               <Text style={s.actionText}>Dark Mode</Text>
-              <Text style={s.comingSoon}>
-                {isDark ? "On" : "Off"}
-              </Text>
+              <Text style={s.comingSoon}>{isDark ? "On" : "Off"}</Text>
             </View>
 
-            <Switch
-              value={isDark}
-              onValueChange={setDark}
-            />
+            <Switch value={isDark} onValueChange={setDark} />
           </View>
         </View>
 
@@ -256,7 +406,10 @@ export default function SettingsScreen() {
 
           <View style={s.divider} />
 
-          <Pressable onPress={confirmDelete} style={({ pressed }) => [s.rowAction, pressed && s.pressed]}>
+          <Pressable
+            onPress={confirmDelete}
+            style={({ pressed }) => [s.rowAction, pressed && s.pressed]}
+          >
             <Text style={[s.actionText, { color: DANGER }]}>Delete My Account &amp; Data</Text>
             <Text style={s.chevron}>›</Text>
           </Pressable>
@@ -306,7 +459,6 @@ export default function SettingsScreen() {
     </View>
   );
 }
-
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
@@ -509,6 +661,54 @@ const styles = (theme: AppTheme) =>
     logoutText: {
       fontSize: 18,
       fontWeight: "700",
+      color: theme.text,
+    },
+
+    // ✅ New styles for reminders
+    reminderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    reminderTitle: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: theme.text,
+    },
+    reminderSub: {
+      marginTop: 4,
+      fontSize: 13,
+      fontWeight: "600",
+      color: theme.subtleText,
+    },
+    timePill: {
+      alignSelf: "flex-start",
+      marginTop: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: theme.mode === "dark" ? "#2A2A35" : "#ececf0",
+      backgroundColor: theme.mode === "dark" ? "#121218" : "#fff",
+    },
+    timePillText: {
+      fontSize: 13,
+      fontWeight: "800",
+      color: theme.text,
+    },
+    doneBtn: {
+      marginTop: 10,
+      alignItems: "center",
+      paddingVertical: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: theme.mode === "dark" ? "#2A2A35" : "#ececf0",
+      backgroundColor: theme.card,
+    },
+    doneText: {
+      fontSize: 16,
+      fontWeight: "800",
       color: theme.text,
     },
 

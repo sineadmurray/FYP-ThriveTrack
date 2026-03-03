@@ -1,8 +1,8 @@
 import { useRouter, type Href } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { Animated, Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 
 const { width: W } = Dimensions.get("window");
 const PANEL_WIDTH = Math.min(420, W * 0.9);

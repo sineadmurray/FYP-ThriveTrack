@@ -12,9 +12,9 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
 
 /* -------------------- */
 /* Types */

@@ -13,8 +13,8 @@ import {
   View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 
 type Mode = "login" | "signup";
 

@@ -3,8 +3,8 @@ import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import Auth from "../app/components/Auth";
-import { ThemeProvider } from "../app/theme/ThemeContext";
 import { supabase } from "../lib/supabase";
+import { ThemeProvider } from "../theme/ThemeContext";
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);

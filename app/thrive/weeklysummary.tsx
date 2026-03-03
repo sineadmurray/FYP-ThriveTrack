@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
 
 type WeeklySummaryCounts = {
   moodCount: number;

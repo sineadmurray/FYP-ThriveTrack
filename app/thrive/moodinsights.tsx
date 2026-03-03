@@ -14,9 +14,9 @@ import {
 } from "react-native";
 import { LineChart, PieChart } from "react-native-gifted-charts";
 import { authedFetch } from "../../lib/authedFetch";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
 
 type MoodEntry = {
   id: string;

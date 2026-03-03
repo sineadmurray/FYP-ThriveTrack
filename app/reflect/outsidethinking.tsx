@@ -17,9 +17,9 @@ import {
 } from "react-native";
 import { API_BASE } from "../../lib/api";
 import { authedFetch } from "../../lib/authedFetch";
+import { useTheme } from "../../theme/ThemeContext";
+import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
-import { useTheme } from "../theme/ThemeContext";
-import type { AppTheme } from "../theme/themes";
 
 
 type OutsideInPrompt = {
