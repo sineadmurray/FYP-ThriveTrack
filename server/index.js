@@ -1649,7 +1649,8 @@ app.post("/ai/reflection", requireAuth, async (req, res) => {
 
 app.delete("/me", requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id; // <-- depends on your requireAuth; adjust if yours uses req.userId etc.
+    const userId = req.user?.id || req.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorised" });
 
     // 1) Delete user-owned rows from YOUR tables (adjust table names)
     // Example:
