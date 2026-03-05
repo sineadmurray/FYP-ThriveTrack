@@ -1324,7 +1324,6 @@ app.get("/weekly_summary", requireAuth, async (req, res) => {
     );
 
     // Reflect entries (Reflect section)
-    // This includes: end_of_day_reflections, gratitude_entries, trap_and_track, outside_in_actions
     const reflectCountResult = await pool.query(
       `SELECT (
           (SELECT COUNT(*) FROM end_of_day_reflections WHERE user_id=$1 AND created_at >= ${since}) +
@@ -1336,7 +1335,6 @@ app.get("/weekly_summary", requireAuth, async (req, res) => {
     );
 
     // Grow entries (Grow section)
-    // This includes: daily_plans, long_term_visions, where_i_am_reflections, weekly_reflections
     const growCountResult = await pool.query(
       `SELECT (
           (SELECT COUNT(*) FROM daily_plans            WHERE user_id=$1 AND created_at >= ${since}) +
@@ -1570,10 +1568,6 @@ function detectCrisis(text) {
 }
 
 function crisisResponse() {
-  // Ireland-focused since your timezone is Dublin; still broadly usable.
-  // Emergency numbers: 112 or 999 in Ireland. :contentReference[oaicite:2]{index=2}
-  // Samaritans Ireland: 116 123, email jo@samaritans.ie :contentReference[oaicite:3]{index=3}
-  // Pieta crisis helpline page (number shown there). :contentReference[oaicite:4]{index=4}
   return {
     reply: [
       "I’m really sorry you’re feeling this way. You don’t have to carry it alone.",
@@ -1619,7 +1613,7 @@ app.post("/ai/reflection", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "message_too_long" });
     }
 
-    // Crisis gate (don’t call the model)
+    // Crisis gate 
     if (detectCrisis(lastUserMsg)) {
       return res.json(crisisResponse());
     }
@@ -1627,7 +1621,7 @@ app.post("/ai/reflection", requireAuth, async (req, res) => {
     const system = buildSystemPrompt();
 
     const completion = await openai.chat.completions.create({
-      model: AI_MODEL, // "gpt-4o-mini"
+      model: AI_MODEL, 
       messages: [
         { role: "system", content: system },
         ...convo.map((m) => ({ role: m.role, content: m.content })),
