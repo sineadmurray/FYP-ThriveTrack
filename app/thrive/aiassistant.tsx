@@ -27,7 +27,7 @@ export default function AIReflectionAssistantScreen() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // ✅ Messages start with the assistant greeting (matches your mock)
+  // Messages start with the assistant greeting 
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       role: "assistant",
@@ -49,13 +49,13 @@ export default function AIReflectionAssistantScreen() {
     []
   );
 
-  // ✅ Auto-scroll
+  // Auto-scroll
   const scrollRef = useRef<ScrollView>(null);
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages, loading]);
 
-  // ✅ Send message (stale state safe)
+  // Send message 
   async function sendMessage(userText: string) {
     const trimmed = userText.trim();
     if (!trimmed || loading) return;
@@ -63,7 +63,7 @@ export default function AIReflectionAssistantScreen() {
     setInput("");
     setLoading(true);
 
-    // Build conversation from the latest messages state (avoids stale bug)
+    // Build conversation from the latest messages state 
     let nextMessages: ChatMsg[] = [];
 
     setMessages((prev) => {
@@ -98,8 +98,7 @@ export default function AIReflectionAssistantScreen() {
         { role: "assistant", content: json.reply },
       ]);
 
-      // Optional: you can use json.flags?.crisis later if you want
-      // const crisis = json.flags?.crisis === true;
+
     } catch (e: any) {
       setMessages((prev) => [
         ...prev,
@@ -116,7 +115,6 @@ export default function AIReflectionAssistantScreen() {
   }
 
 
-  
   return (
     <View style={s.root}>
       <ScrollView
@@ -125,7 +123,7 @@ export default function AIReflectionAssistantScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ----- Header (same as Thrive) ----- */}
+        {/* ----- Header  ----- */}
         <View style={s.header}>
           <Image
             source={require("../../assets/images/ThriveTrack Logo.png")}
@@ -184,7 +182,7 @@ export default function AIReflectionAssistantScreen() {
           {prompts.map((p) => (
             <Pressable
               key={p}
-              onPress={() => sendMessage(p)} // ✅ instant send (optional UX win)
+              onPress={() => sendMessage(p)} 
               disabled={loading}
               style={({ pressed }) => [
                 s.chip,
@@ -236,7 +234,6 @@ export default function AIReflectionAssistantScreen() {
   );
 }
 
-// ✅ AIReflectionAssistantScreen styles (theme-based)
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
     root: {
@@ -317,7 +314,7 @@ const styles = (theme: AppTheme) =>
       marginBottom: 10,
       alignSelf: "flex-start",
       maxWidth: "86%",
-      backgroundColor: theme.thrive.bubbleBg, // ✅ new theme key
+      backgroundColor: theme.thrive.bubbleBg,
       borderRadius: 22,
       paddingVertical: 14,
       paddingHorizontal: 16,
@@ -336,7 +333,7 @@ const styles = (theme: AppTheme) =>
 
     userBubble: {
       alignSelf: "flex-end",
-      backgroundColor: theme.thrive.userBubbleBg, // ✅ new theme key
+      backgroundColor: theme.thrive.userBubbleBg, 
     },
     userText: {
       color: theme.text,
@@ -349,12 +346,12 @@ const styles = (theme: AppTheme) =>
       gap: 10,
     },
     chip: {
-      backgroundColor: theme.thrive.chipBg, // ✅ new theme key
+      backgroundColor: theme.thrive.chipBg, 
       borderRadius: 999,
       paddingVertical: 10,
       paddingHorizontal: 14,
       borderWidth: 1,
-      borderColor: theme.thrive.chipBorder, // ✅ new theme key
+      borderColor: theme.thrive.chipBorder,
     },
     chipText: {
       color: theme.text,
@@ -388,7 +385,7 @@ const styles = (theme: AppTheme) =>
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: theme.thrive.sendBtnBg, // ✅ new theme key
+      backgroundColor: theme.thrive.sendBtnBg, 
       alignItems: "center",
       justifyContent: "center",
     },
@@ -400,7 +397,7 @@ const styles = (theme: AppTheme) =>
     disclaimer: {
       marginTop: 16,
       textAlign: "center",
-      color: theme.thrive.disclaimerText, // ✅ new theme key
+      color: theme.thrive.disclaimerText, 
       fontSize: 13,
       lineHeight: 18,
       paddingHorizontal: 10,

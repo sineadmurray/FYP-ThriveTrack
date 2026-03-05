@@ -184,9 +184,6 @@ function ReflectionCard({
   );
 }
 
-/* Reflect / purple theme */
-// ✅ DailyReflectionScreen styles (theme-based)
-// Remove the old hard-coded constants (BG, CARD_BG, PURPLE, etc.)
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

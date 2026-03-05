@@ -19,9 +19,6 @@ import { useTheme } from "../../theme/ThemeContext";
 import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
 
-/* -------------------- */
-/* Small UI components */
-/* -------------------- */
 
 function TogglePill({
   label,
@@ -250,9 +247,7 @@ export default function ExportShareScreen() {
   );
 }
 
-/* -------------------- */
-/* Styles (theme-based) */
-/* -------------------- */
+
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

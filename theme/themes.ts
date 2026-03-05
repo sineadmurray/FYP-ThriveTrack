@@ -2,7 +2,7 @@ export const lightTheme = {
     mode: "light",
   
     // Core
-    background: "#fdeff2",   // your Home PINK background
+    background: "#fdeff2",   
     card: "#ffffff",
     text: "#222222",
     subtleText: "#6c6c6c",
@@ -15,7 +15,7 @@ export const lightTheme = {
     success: "#19b46b",
     muted: "#9b9b9b",
   
-    // Section colours (keep your current section vibe)
+    // Section colours 
     reflect: {
       tint: "#d8d3ff",
       title: "#8f79ea",

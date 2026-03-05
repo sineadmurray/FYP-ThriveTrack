@@ -104,7 +104,6 @@ export default function OutsideThinking() {
     try {
       setSaving(true);
 
-      // ✅ AUTHED route: use authedFetch + DO NOT send user_id
       const res = await authedFetch("/outside_in_actions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -288,7 +287,6 @@ export default function OutsideThinking() {
   </KeyboardAvoidingView>
   );
 }
-// ✅ OutsideThinking styles (theme-based)
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

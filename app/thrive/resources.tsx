@@ -16,9 +16,6 @@ import { useTheme } from "../../theme/ThemeContext";
 import type { AppTheme } from "../../theme/themes";
 import SideDrawer from "../components/SideDrawer";
 
-/* -------------------- */
-/* Types */
-/* -------------------- */
 
 type ResourceItem = {
   title: string;
@@ -35,9 +32,6 @@ type ResourceSection = {
   items: ResourceItem[];
 };
 
-/* -------------------- */
-/* Data */
-/* -------------------- */
 
 const QUICK_SUPPORT: ResourceItem[] = [
   {
@@ -181,9 +175,6 @@ const RESOURCE_SECTIONS: ResourceSection[] = [
   },
 ];
 
-/* -------------------- */
-/* Safe open handler */
-/* -------------------- */
 
 async function openResource(item: ResourceItem) {
   if (item.type === "link") {
@@ -345,7 +336,6 @@ function ResourceCard({
   );
 }
 
-// ✅ ResourcesScreen styles (theme-based)
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
     root: {
@@ -519,7 +509,7 @@ const styles = (theme: AppTheme) =>
 
     footerCard: {
       marginTop: 18,
-      backgroundColor: theme.thrive.footerBg, // ✅ new theme key
+      backgroundColor: theme.thrive.footerBg, 
       borderRadius: 22,
       paddingVertical: 26,
       paddingHorizontal: 18,

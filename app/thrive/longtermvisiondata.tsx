@@ -155,7 +155,7 @@ export default function LongTermVisionDataScreen() {
           </View>
         </View>
 
-        {/* SMART helper card (read-only, same as entry screen) */}
+        {/* SMART helper card */}
         <View style={s.card}>
           <Text style={s.cardTitle}>Make Your Vision Clear &amp; Achievable</Text>
           <View style={s.smartBox}>

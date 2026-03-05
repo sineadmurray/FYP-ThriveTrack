@@ -569,7 +569,7 @@ export default function MoodInsightsScreen() {
   );
 }
 
-// ✅ MoodInsightsScreen styles (theme-based)
+
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
     root: {

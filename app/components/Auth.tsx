@@ -15,6 +15,7 @@ import {
 import { supabase } from "../../lib/supabase";
 import { useTheme } from "../../theme/ThemeContext";
 import type { AppTheme } from "../../theme/themes";
+import { setHasSeenOnboarding } from "../../utils/onboarding";
 
 type Mode = "login" | "signup";
 
@@ -79,6 +80,9 @@ export default function Auth() {
       Alert.alert("Sign up failed", error.message);
       return;
     }
+
+    
+    await setHasSeenOnboarding(false);
 
     const { error: updateErr } = await supabase.auth.updateUser({
       data: { display_name: name },

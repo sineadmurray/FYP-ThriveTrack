@@ -6,7 +6,6 @@ import { getLogoBase64 } from "./logoBase64";
 import { API_BASE } from "../lib/api";
 import { supabase } from "../lib/supabase";
 
-/* ---------------- Timeout + Authed HTTP ---------------- */
 
 function withTimeout<T>(p: Promise<T>, ms = 12000): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -44,7 +43,6 @@ async function authedHttp<T = any>(path: string): Promise<T> {
   return text ? (JSON.parse(text) as T) : (undefined as T);
 }
 
-/* ---------------- Period Helper ---------------- */
 
 function getPeriodRange(period: TimePeriod): { label: string; fromISO: string | null } {
   const now = new Date();
@@ -60,7 +58,6 @@ function getPeriodRange(period: TimePeriod): { label: string; fromISO: string | 
   };
 }
 
-/* ---------------- Timeline Normalisation ---------------- */
 
 type ItemGroup = "reflect" | "grow";
 
@@ -85,7 +82,6 @@ function escapeHtml(text: string) {
     .replaceAll("'", "&#039;");
 }
 
-/* ---------------- HTML Builder (better design) ---------------- */
 
 function buildHtml({
   logoDataUri,
@@ -110,10 +106,10 @@ function buildHtml({
 
   const datesInOrder = Array.from(grouped.keys());
 
-  // Colours (tweak if you want)
+  // Colours 
   const PINK = "#ff5db1";
-  const REFLECT = "#6d5bc5"; // purple
-  const GROW = "#2ea66f"; // green
+  const REFLECT = "#6d5bc5"; 
+  const GROW = "#2ea66f"; 
 
   return `
   <html>
@@ -330,7 +326,6 @@ function buildHtml({
   `;
 }
 
-/* ---------------- Endpoint Mapping ---------------- */
 
 function getEndpointForCategory(cat: ExportCategory, fromISO: string | null) {
   const qs = fromISO ? `?from=${encodeURIComponent(fromISO)}` : "";
@@ -363,7 +358,7 @@ function getEndpointForCategory(cat: ExportCategory, fromISO: string | null) {
   }
 }
 
-/* ---------------- Row -> Timeline Mapping (with group) ---------------- */
+
 
 function groupForCategory(cat: ExportCategory): ItemGroup {
   const reflect: ExportCategory[] = [
@@ -513,7 +508,6 @@ function toTimelineItems(cat: ExportCategory, rows: any[]): TimelineItem[] {
   }
 }
 
-/* ---------------- Main Export Function ---------------- */
 
 export async function generateAndSharePdf({
   period,

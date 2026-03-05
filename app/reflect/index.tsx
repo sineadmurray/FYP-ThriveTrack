@@ -126,7 +126,6 @@ function ReflectCard({
     </Pressable>
   );
 }
-// ✅ ReflectScreen styles (theme-based)
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

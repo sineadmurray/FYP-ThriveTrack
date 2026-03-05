@@ -135,7 +135,7 @@ function ThriveCard({
   );
 }
 
-// ✅ ThriveScreen styles (theme-based)
+
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
     root: {
@@ -240,7 +240,7 @@ const styles = (theme: AppTheme) =>
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: theme.thrive.chevBg, // ✅ new theme key
+      backgroundColor: theme.thrive.chevBg, 
       alignItems: "center",
       justifyContent: "center",
       marginLeft: 10,

@@ -52,7 +52,7 @@ export default function SettingsScreen() {
   const [nameDraft, setNameDraft] = useState("");
   const [savingName, setSavingName] = useState(false);
 
-  // ✅ Notification settings state
+  // Notification settings state
   const [reminders, setReminders] = useState<ReminderSettings | null>(null);
   const [pickerKey, setPickerKey] = useState<ReminderKey | null>(null);
 
@@ -82,7 +82,7 @@ export default function SettingsScreen() {
 
   async function deleteAccountAndData() {
   try {
-    // Cancel scheduled notifications first (nice + avoids “ghost reminders”)
+    // Cancel scheduled notifications first 
     if (reminders) {
       await cancelScheduled(reminders.dailyPlan.notificationId);
       await cancelScheduled(reminders.mood.notificationId);
@@ -100,8 +100,7 @@ export default function SettingsScreen() {
     await supabase.auth.signOut();
 
     // Navigate to your auth screen
-    // Adjust this path to whatever your app uses for login.
-    router.replace("/"); // e.g. "/login" or "/(auth)/login"
+    router.replace("/"); 
   } catch (e: any) {
     Alert.alert("Delete failed", e?.message ?? "Something went wrong.");
   }
@@ -156,7 +155,7 @@ function confirmDelete() {
   }
 
   // ---------------------------
-  // ✅ Notification logic
+  // Notification logic
   // ---------------------------
   async function persist(next: ReminderSettings) {
     setReminders(next);
@@ -176,7 +175,7 @@ function confirmDelete() {
         return;
       }
 
-      // Cancel existing schedule if any (defensive)
+      // Cancel existing schedule if any 
       await cancelScheduled(reminders[key].notificationId);
 
       const id = await scheduleDailyReminder(key, reminders[key].hour, reminders[key].minute);
@@ -333,7 +332,7 @@ function confirmDelete() {
           )}
         </View>
 
-        {/* ✅ NOTIFICATIONS */}
+        {/* NOTIFICATIONS */}
         <Text style={s.sectionLabel}>NOTIFICATIONS &amp; REMINDERS</Text>
         <View style={s.card}>
           {reminders ? (
@@ -684,7 +683,7 @@ const styles = (theme: AppTheme) =>
       color: theme.text,
     },
 
-    // ✅ New styles for reminders
+  
     reminderRow: {
       flexDirection: "row",
       alignItems: "center",

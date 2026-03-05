@@ -39,7 +39,6 @@ export default function SideDrawer({ visible, onClose }: Props) {
     onClose();
   };
 
-  // ✅ MenuButton inside so it can use `s`
   const MenuButton = ({ label, onPress }: { label: string; onPress: () => void }) => (
     <Pressable onPress={onPress} style={({ pressed }) => [s.menuBtn, { opacity: pressed ? 0.9 : 1 }]}>
       <Text style={s.menuBtnText}>{label}</Text>

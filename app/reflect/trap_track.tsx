@@ -214,7 +214,6 @@ function ReflectionCard({
   );
 }
 
-// ✅ TrapTrackScreen styles (theme-based)
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

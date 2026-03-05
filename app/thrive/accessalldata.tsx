@@ -689,7 +689,7 @@ const styles = (theme: AppTheme) =>
       borderRadius: 20,
       backgroundColor: theme.thrive.pillBg,
       borderWidth: 1,
-      borderColor: theme.thrive.pillBorder, // ✅ new theme key
+      borderColor: theme.thrive.pillBorder,
     },
     filterPillActive: {
       backgroundColor: theme.thrive.title,
@@ -697,7 +697,7 @@ const styles = (theme: AppTheme) =>
     },
     filterText: {
       fontSize: 14,
-      color: theme.thrive.pillText, // ✅ new theme key
+      color: theme.thrive.pillText, 
       fontWeight: "600",
     },
     filterTextActive: {
@@ -741,7 +741,7 @@ const styles = (theme: AppTheme) =>
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: theme.thrive.chevBg, // ✅ new theme key
+      backgroundColor: theme.thrive.chevBg,
       alignItems: "center",
       justifyContent: "center",
       marginLeft: 8,

@@ -40,7 +40,6 @@ export async function cancelScheduled(notificationId: string | null | undefined)
   try {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   } catch {
-    // ignore
   }
 }
 

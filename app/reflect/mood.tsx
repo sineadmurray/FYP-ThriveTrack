@@ -53,7 +53,7 @@ export default function MoodJournalScreen() {
     try {
       setSaving(true);
 
-      // keep notes reasonable
+      
       const trimmed = notes.trim().slice(0, 300);
 
 
@@ -209,7 +209,7 @@ export default function MoodJournalScreen() {
   );
 }
 
-// ✅ MoodJournalScreen styles (theme-based)
+
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({

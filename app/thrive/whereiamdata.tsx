@@ -46,7 +46,6 @@ export default function WhereIAmEntryDataScreen() {
     [params.created_at]
   );
 
-  // Local editable state (start from params)
   const [mindNow, setMindNow] = useState(params.mind_now ?? "");
   const [mindWant, setMindWant] = useState(params.mind_want ?? "");
 

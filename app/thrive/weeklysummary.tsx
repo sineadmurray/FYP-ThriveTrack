@@ -55,9 +55,6 @@ export default function WeeklySummaryScreen() {
     setLoading(true);
     setErrorMsg(null);
 
-    // If your server reads user from auth, you don't need user_id.
-    // If it STILL needs it, keep the query param line below.
-    // const res = await authedFetch(`/weekly_summary?user_id=${encodeURIComponent(userId)}`);
     const res = await authedFetch("/weekly_summary");
 
     if (!res.ok) {
@@ -83,12 +80,9 @@ export default function WeeklySummaryScreen() {
     setAiLoading(true);
     setAiError(null);
 
-    // If your server reads user from auth, no body is needed.
-    // If it STILL needs user_id, keep the JSON.stringify line.
     const res = await authedFetch("/weekly_summary_ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // body: JSON.stringify({ user_id: userId }),
     });
 
     if (!res.ok) {
@@ -181,7 +175,7 @@ export default function WeeklySummaryScreen() {
               Start logging moods or reflections to see your weekly summary.
             </Text>
             <Pressable
-              onPress={() => router.push("/reflect")} // adjust if your route is different
+              onPress={() => router.push("/reflect")}
               style={s.retryBtn}
             >
               <Text style={s.retryBtnText}>Log Something</Text>
@@ -306,7 +300,6 @@ export default function WeeklySummaryScreen() {
   );
 }
 
-// ✅ WeeklySummaryScreen styles (theme-based)
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
     root: {
@@ -462,7 +455,7 @@ const styles = (theme: AppTheme) =>
       marginBottom: 30,
     },
     regenerateButton: {
-      backgroundColor: theme.thrive.regenerateBtnBg, // ✅ new theme key
+      backgroundColor: theme.thrive.regenerateBtnBg, 
       paddingVertical: 18,
       borderRadius: 28,
       alignItems: "center",

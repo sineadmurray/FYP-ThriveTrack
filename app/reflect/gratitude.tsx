@@ -46,7 +46,6 @@ export default function DailyGratitudeScreen() {
 
   const [openInspo, setOpenInspo] = useState(false);
 
-  // optional: show character count like mood.tsx
   const maxLen = 250;
   const trimmed = useMemo(() => gratitude.slice(0, maxLen), [gratitude]);
 
@@ -214,7 +213,6 @@ async function handleSave() {
   );
 }
 
-// ✅ DailyGratitudeScreen styles (theme-based)
 
 const styles = (theme: AppTheme) =>
   StyleSheet.create({
