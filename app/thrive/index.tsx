@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
 import type { AppTheme } from "../../theme/themes";
@@ -63,7 +63,7 @@ export default function ThriveScreen() {
         {/* ----- Header  ----- */}
         <View style={s.header}>
           <Image
-            source={require("../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrackLogo.png")}
             style={s.logo}
             resizeMode="contain"
           />

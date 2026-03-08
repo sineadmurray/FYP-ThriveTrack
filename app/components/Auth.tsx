@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useTheme } from "../../theme/ThemeContext";
@@ -124,7 +124,7 @@ export default function Auth() {
         <View style={s.logoWrap}>
           <View style={s.logoTile}>
             <Image
-              source={require("../../assets/images/ThriveTrack Logo.png")}
+              source={require("../../assets/images/ThriveTrackLogo.png")}
               style={s.logoImage}
               resizeMode="cover"
             />

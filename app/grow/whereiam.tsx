@@ -103,7 +103,7 @@ export default function WhereIAmNowScreen() {
         {/* Header */}
         <View style={s.header}>
           <Image
-            source={require("../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrackLogo.png")}
             style={s.logo}
             resizeMode="contain"
           />

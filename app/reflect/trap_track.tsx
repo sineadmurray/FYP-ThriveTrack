@@ -1,18 +1,18 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  View,
+    Alert,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableWithoutFeedback,
+    View,
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import { useTheme } from "../../theme/ThemeContext";
@@ -85,7 +85,7 @@ export default function TrapTrackScreen() {
         {/* Header */}
         <View style={s.header}>
           <Image
-            source={require("../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrackLogo.png")}
             style={s.logo}
             resizeMode="contain"
           />

@@ -1,16 +1,16 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Image,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    Image,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { LineChart, PieChart } from "react-native-gifted-charts";
 import { authedFetch } from "../../lib/authedFetch";
@@ -337,7 +337,7 @@ export default function MoodInsightsScreen() {
         {/* Header */}
         <View style={s.header}>
           <Image
-            source={require("../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrackLogo.png")}
             style={s.logo}
             resizeMode="contain"
           />

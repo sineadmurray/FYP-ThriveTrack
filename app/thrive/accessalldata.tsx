@@ -1,14 +1,14 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { authedFetch } from "../../lib/authedFetch";
 import { useTheme } from "../../theme/ThemeContext";
@@ -252,7 +252,7 @@ export default function AccessAllDataScreen() {
         {/* Header */}
         <View style={s.header}>
           <Image
-            source={require("../../assets/images/ThriveTrack Logo.png")}
+            source={require("../../assets/images/ThriveTrackLogo.png")}
             style={s.logo}
             resizeMode="contain"
           />
