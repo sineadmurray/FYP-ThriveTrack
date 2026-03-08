@@ -4,33 +4,34 @@
     "slug": "ThriveTrack",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ThriveTrack Logo.png",
+    "icon": "./assets/images/ThriveTrackLogo.png",
     "scheme": "thrivetrack",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.ThriveTrack"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/ThriveTrack Logo.png",
-        "backgroundImage": "./assets/images/ThriveTrack Logo.png",
-        "monochromeImage": "./assets/images/ThriveTrack Logo.png"
+        "foregroundImage": "./assets/images/ThriveTrackLogo.png",
+        "backgroundImage": "./assets/images/ThriveTrackLogo.png",
+        "monochromeImage": "./assets/images/ThriveTrackLogo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/ThriveTrack Logo.png"
+      "favicon": "./assets/images/ThriveTrackLogo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/ThriveTrack Logo.png",
+          "image": "./assets/images/ThriveTrackLogo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
